@@ -182,16 +182,22 @@ def ejecutar_scraping():
         
     return corpus_final
 
-def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_canonico.json", max_intentos=3):
+def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_canonico_v1.json", max_intentos=3):
     """
     Gestor principal de datos con interruptor de entorno.
     modo='estatico': Carga la verdad absoluta desde el disco local.
     modo='dinamico': Fuerza la extracción web ignorando el disco para crear una nueva versión.
     """
+    # =====================================================================
+    # NUEVA GESTIÓN DE RUTAS (Ruta Absoluta Dinámica)
+    # Esto asegura que sin importar desde dónde ejecutes el script, 
+    # siempre apuntará a la carpeta 'datos' en la raíz del proyecto.
+    # =====================================================================
+    directorio_script = os.path.dirname(os.path.abspath(__file__))
+    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    ruta_completa = os.path.join(carpeta_salida, archivo_backup)
+
     if modo == "estatico":
-        carpeta_salida = "datos"
-        ruta_completa = os.path.join(carpeta_salida, archivo_backup)
-        
         print(f"[*] MODO ESTÁTICO ACTIVO: Cargando la verdad absoluta desde '{ruta_completa}'...")
         if os.path.exists(ruta_completa):
             with open(ruta_completa, 'r', encoding='utf-8') as f:
@@ -209,12 +215,8 @@ def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_cano
             try:
                 corpus_fresco = ejecutar_scraping()
                 
-                # --- DEFINIR CARPETA Y RUTA DE SALIDA ---
-                carpeta_salida = "datos"
-                os.makedirs(carpeta_salida, exist_ok=True) # Crea la carpeta si no existe
-                
-                # Unimos la carpeta con el nombre del archivo
-                ruta_completa = os.path.join(carpeta_salida, archivo_backup)
+                # Aseguramos que la carpeta de salida exista antes de intentar guardar
+                os.makedirs(carpeta_salida, exist_ok=True) 
 
                 # --- EMPAQUETADO DEL DOCUMENTO MAESTRO ---
                 documento_maestro = {
@@ -241,9 +243,9 @@ def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_cano
                     print("\n[!] TODOS LOS INTENTOS DE EXTRACCIÓN HAN FALLADO.")
 
         # --- FALLBACK DE EMERGENCIA ---
-        if os.path.exists(archivo_backup):
-            print(f"[*] ATENCIÓN: El scraping dinámico falló por completo, pero se utilizará '{archivo_backup}' como medida de contingencia.")
-            with open(archivo_backup, 'r', encoding='utf-8') as f:
+        if os.path.exists(ruta_completa):
+            print(f"[*] ATENCIÓN: El scraping dinámico falló por completo, pero se utilizará '{ruta_completa}' como medida de contingencia.")
+            with open(ruta_completa, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
             print("[!] ERROR FATAL: No hay conexión a internet y no existe ningún backup local para iniciar el sistema.")

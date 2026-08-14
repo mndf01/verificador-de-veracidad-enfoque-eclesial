@@ -225,7 +225,7 @@ def obtener_corpus_constituciones(modo="estatico", archivo_backup="corpus_consti
     return None
 
 if __name__ == '__main__':
-    MODO_EJECUCION = "dinamico"
+    MODO_EJECUCION = "estatico"
     ARCHIVO_SALIDA = "corpus_constituciones_v1.json"
     
     corpus_maestro = obtener_corpus_constituciones(modo=MODO_EJECUCION, archivo_backup=ARCHIVO_SALIDA)

@@ -1,0 +1,15 @@
+[models]
+sb_light_model = "paraphrase-multilingual-MiniLM-L12-v2"
+sb_medium_model = "intfloat/multilingual-e5-small"
+sb_activo = "paraphrase-multilingual-MiniLM-L12-v2"
+
+[paths]
+data_dir = "data"
+corpus_dir = "src/corp_extractor/datos"
+chroma_dir = "data/chroma"
+
+[chroma]
+coleccion = "corpus_canonico"
+espacio_hnsw = "cosine"
+telemetria = false
+batch_size = 200

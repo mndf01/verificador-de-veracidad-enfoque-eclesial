@@ -187,7 +187,7 @@ def ejecutar_scraping_constituciones():
 
 def obtener_corpus_constituciones(modo="estatico", archivo_backup="corpus_constituciones_v1.json", max_intentos=3):
     directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    carpeta_salida = os.path.join(directorio_script, "data")
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":
@@ -225,7 +225,7 @@ def obtener_corpus_constituciones(modo="estatico", archivo_backup="corpus_consti
     return None
 
 if __name__ == '__main__':
-    MODO_EJECUCION = "estatico"
+    MODO_EJECUCION = "dinamico"
     ARCHIVO_SALIDA = "corpus_constituciones_v1.json"
     
     corpus_maestro = obtener_corpus_constituciones(modo=MODO_EJECUCION, archivo_backup=ARCHIVO_SALIDA)

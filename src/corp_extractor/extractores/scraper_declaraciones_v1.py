@@ -201,7 +201,7 @@ def obtener_corpus_declaraciones(modo="estatico", archivo_backup="corpus_declara
     """Gestor principal de datos (ETL)."""
     
     directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    carpeta_salida = os.path.join(directorio_script, "data")
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":

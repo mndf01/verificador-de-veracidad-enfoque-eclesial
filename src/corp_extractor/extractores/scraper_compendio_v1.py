@@ -124,7 +124,7 @@ def extraer_compendio(url):
 
 def obtener_corpus_compendio(modo="estatico", archivo_backup="corpus_compendio_v1.json"):
     directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    carpeta_salida = os.path.join(directorio_script, "data")
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":

@@ -193,7 +193,7 @@ def ejecutar_scraping_decretos():
 
 def obtener_corpus_decretos(modo="estatico", archivo_backup="corpus_decretos_v1.json", max_intentos=3):
     directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    carpeta_salida = os.path.join(directorio_script, "data")
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":

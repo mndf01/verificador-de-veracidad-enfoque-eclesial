@@ -194,7 +194,7 @@ def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_cano
     # siempre apuntará a la carpeta 'datos' en la raíz del proyecto.
     # =====================================================================
     directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "..", "datos")
+    carpeta_salida = os.path.join(directorio_script, "data")
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":
@@ -262,7 +262,7 @@ if __name__ == '__main__':
     # Cambia a "estatico" para cargar la información congelada al instante
     # =====================================================================
     
-    MODO_EJECUCION = "estatico" 
+    MODO_EJECUCION = "dinamico" 
     ARCHIVO_SALIDA = "corpus_derecho_canonico_v1.json"
     
     corpus_maestro = obtener_corpus_canonico(modo=MODO_EJECUCION, archivo_backup=ARCHIVO_SALIDA)

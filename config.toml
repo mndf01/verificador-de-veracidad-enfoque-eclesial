@@ -13,3 +13,9 @@ coleccion = "corpus_canonico"
 espacio_hnsw = "cosine"
 telemetria = false
 batch_size = 200
+
+[corp_extractor]
+# Ruta donde se guardan y leen los JSONs del vaticano
+directorio_datos = "src/corp_extractor/datos/"
+# Modo de ejecucion de los extractores: # Usar "dinamico" para forzar la descarga web desde vatican.va, o "estatico" desde local si existen documentos
+modo_ejecucion = "estatico"

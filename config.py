@@ -21,11 +21,19 @@ class ChromaConfig(BaseModel):
     telemetria: bool
     batch_size: int
 
+class CorpExtractorConfig(BaseModel):
+    directorio_datos: str
+    modo_ejecucion: str
+
+
 # TODO -> para agregar otros config files tipo .env falta adaptar esta clase para que lea.
 class Settings(BaseSettings):
     models: ModelsConfig
     paths: PathsConfig
     chroma: ChromaConfig
+        
+    #extractor del corpus vaticano
+    corp_extractor: CorpExtractorConfig
 
     model_config = SettingsConfigDict(
         toml_file=CONFIG_PATH

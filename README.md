@@ -42,3 +42,17 @@ class Settings(BaseSettings):
     test: TestConfig
 ...
 ~~~
+
+
+### Ejecutar el Extractor del Corpus (ETL)
+
+Las configuraciones de este módulo se controlan desde el archivo `config.toml` (en la sección `[corp_extractor]`). Dependiendo de la variable `modo_ejecucion`, el pipeline orquestará el proceso de la siguiente manera:
+
+* **Modo `"dinamico"`:** Se conecta a internet (`vatican.va`), **descarga** en tiempo real todos los textos oficiales, guarda los archivos crudos y luego los pasa por el **clasificador** para inyectarles la categoría y el nivel de autoridad.
+* **Modo `"estatico"`:** No usa internet. Lee los archivos JSON crudos que ya están descargados localmente y los pasa directamente por el **clasificador**.
+
+Para correr todo el proceso centralizado, ejecuta el siguiente comando desde la **raíz del proyecto** (con el entorno virtual activado):
+
+~~~ bash
+python src/corp_extractor/main_etl.py
+~~~ 

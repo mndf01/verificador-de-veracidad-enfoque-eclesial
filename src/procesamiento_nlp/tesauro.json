@@ -1,0 +1,58 @@
+{
+  "conceptos": {
+    "ID_PAPA": {
+      "termino_canonico": "Sumo Pontífice",
+      "variaciones_lexicas": ["Papa", "Obispo de Roma", "Santo Padre", "Sucesor de Pedro"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico",
+      "nivel_autoridad": 1.0
+    },
+    "ID_MATRIMONIO": {
+      "termino_canonico": "Vínculo Matrimonial",
+      "variaciones_lexicas": ["Matrimonio", "Boda", "Casamiento", "Unión eclesiástica"],
+      "categoria": "Sacramentos y Liturgia",
+      "nivel_autoridad": 0.8
+    },
+    "ID_EXPULSION": {
+      "termino_canonico": "Dimisión del estado clerical",
+      "variaciones_lexicas": ["Echado", "Expulsado", "Despedido", "Suspendido"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },
+    "ID_HUELGA": {
+      "termino_canonico": "Derecho de huelga",
+      "variaciones_lexicas": ["Huelga", "Sindicato", "Paro laboral", "Protesta"],
+      "categoria": "Doctrina Social y Política",
+      "nivel_autoridad": 0.6
+    },
+    "ID_ABORTO": {
+      "termino_canonico": "Delito de aborto",
+      "variaciones_lexicas": ["Aborto", "Interrupción del embarazo", "Pro-elección"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },	
+    "ID_NULIDAD": {
+      "termino_canonico": "Nulidad",
+      "variaciones_lexicas": ["Anulación", "Anulación matrimonial", "Matrimonio inválido"],
+      "categoria": "Derecho Sacramental",
+      "nivel_autoridad": 0.8
+    },
+    "ID_EUTANASIA": {
+      "termino_canonico": "Eutanasia",
+      "variaciones_lexicas": ["Muerte digna", "Suicidio asistido", "Matar a un enfermo"],
+      "categoria": "Moral y Doctrina Social",
+      "nivel_autoridad": 0.8
+    },
+    "ID_CELIBATO": {
+      "termino_canonico": "Celibato",
+      "variaciones_lexicas": ["Cura soltero", "Prohibición de casarse", "Castidad sacerdotal"],
+      "categoria": "Disciplina del Clero",
+      "nivel_autoridad": 0.8
+    },
+    "ID_EXCOMUNION": {
+      "termino_canonico": "Excomunión",
+      "variaciones_lexicas": ["Expulsado de la iglesia", "Echado de la iglesia", "Desterrado"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    }
+  }
+}

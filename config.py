@@ -12,8 +12,25 @@ class ModelsConfig(BaseModel):
 
 class PathsConfig(BaseModel):
     data_dir: str
+    # Zona Bronze: crudos (_v1.json) que generan los scrapers
+    raw_corpus_dir: str
+    # Zona Gold: procesados (_clasificado.json) listos para la IA
     corpus_dir: str
     chroma_dir: str
+
+
+def resolver_ruta(relativa: str | Path) -> Path:
+    """Resuelve una ruta de config.toml a absoluta contra la raíz del proyecto.
+
+    Las rutas en config.toml son relativas (p. ej. "data/corp_extractor/raw").
+    Al ejecutar los scripts desde distintos directorios, conviene anclarlas
+    a la carpeta del proyecto (donde vive config.py) para que nunca se
+    pierdan por el cwd.
+    """
+    ruta = Path(relativa)
+    if ruta.is_absolute():
+        return ruta
+    return CONFIG_PATH.parent / ruta
 
 class ChromaConfig(BaseModel):
     coleccion: str
@@ -22,7 +39,6 @@ class ChromaConfig(BaseModel):
     batch_size: int
 
 class CorpExtractorConfig(BaseModel):
-    directorio_datos: str
     modo_ejecucion: str
 
 

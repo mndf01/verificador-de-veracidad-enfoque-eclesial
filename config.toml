@@ -5,7 +5,8 @@ sb_activo = "paraphrase-multilingual-MiniLM-L12-v2"
 
 [paths]
 data_dir = "data"
-corpus_dir = "src/corp_extractor/datos"
+raw_corpus_dir = "data/corp_extractor/raw"
+corpus_dir = "data/corp_extractor/clasificado"
 chroma_dir = "data/chroma"
 
 [chroma]
@@ -15,7 +16,5 @@ telemetria = false
 batch_size = 200
 
 [corp_extractor]
-# Ruta donde se guardan y leen los JSONs del vaticano
-directorio_datos = "src/corp_extractor/datos/"
 # Modo de ejecucion de los extractores: # Usar "dinamico" para forzar la descarga web desde vatican.va, o "estatico" desde local si existen documentos
 modo_ejecucion = "estatico"

@@ -3,7 +3,7 @@ import sys
 
 # Aseguramos que Python encuentre la raíz del proyecto para importar config.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-from config import obtener_configuraciones
+from config import obtener_configuraciones, resolver_ruta
 
 # Importamos las funciones principales de tus scrapers
 from extractores.scraper_canones_v1 import obtener_corpus_canonico
@@ -24,13 +24,12 @@ def ejecutar_pipeline():
     settings = obtener_configuraciones()
     modo = settings.corp_extractor.modo_ejecucion
 
-    # 2. Definición exacta de tus rutas (Arquitectura Medallón)
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    
+    # 2. Definición exacta de tus rutas (Arquitectura Medallón) via config
+
     # ZONA BRONZE: Datos Crudos
-    dir_crudos = os.path.join(base_dir, "extractores", "data")
+    dir_crudos = resolver_ruta(settings.paths.raw_corpus_dir)
     # ZONA GOLD: Datos Enriquecidos y listos para la IA
-    dir_procesados = os.path.join(base_dir, "datos")
+    dir_procesados = resolver_ruta(settings.paths.corpus_dir)
 
     # Aseguramos que existan ambas carpetas
     os.makedirs(dir_crudos, exist_ok=True)
@@ -61,10 +60,10 @@ def ejecutar_pipeline():
     # 4. FASE DE TRANSFORMACIÓN (Clasificador de Metadatos)
     print("\n--- FASE 2: CLASIFICACIÓN E INYECCIÓN DE METADATOS ---")
     for archivo_crudo in archivos_crudos:
-        # Lee desde la carpeta de datos crudos (extractores/data/)
+        # Lee desde la carpeta de datos crudos (zona bronze)
         ruta_in = os.path.join(dir_crudos, archivo_crudo)
         
-        # Genera el nombre final y guarda en la carpeta de listos (datos/)
+        # Genera el nombre final y guarda en la carpeta de listos (zona gold)
         nombre_out = archivo_crudo.replace("_v1.json", "_clasificado.json")
         ruta_out = os.path.join(dir_procesados, nombre_out)
         

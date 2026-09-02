@@ -19,7 +19,7 @@ class PathsConfig(BaseModel):
     chroma_dir: str
 
 
-def resolver_ruta(relativa: str | Path) -> Path:
+def resolver_ruta(relativa: str | Path):
     """Resuelve una ruta de config.toml a absoluta contra la raíz del proyecto.
 
     Las rutas en config.toml son relativas (p. ej. "data/corp_extractor/raw").
@@ -29,8 +29,8 @@ def resolver_ruta(relativa: str | Path) -> Path:
     """
     ruta = Path(relativa)
     if ruta.is_absolute():
-        return ruta
-    return CONFIG_PATH.parent / ruta
+        return str(ruta)
+    return str(CONFIG_PATH.parent / ruta)
 
 class ChromaConfig(BaseModel):
     coleccion: str

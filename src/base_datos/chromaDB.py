@@ -29,6 +29,14 @@ def get_coleccion():
     )
 
 def _normalizar_item(datos, tipo_corpus, fuente):
+    """
+    Normaliza los datos de un corpus para su indexacion en ChromaDB.
+
+    :param datos:
+    :param tipo_corpus:
+    :param fuente:
+    :return: ids[], docs[], meta[]
+    """
     ids, docs, meta = [], [], []
     for indice, item in enumerate(datos):
         ids.append(f"{tipo_corpus}:{indice:04d}")

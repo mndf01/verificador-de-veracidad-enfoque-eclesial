@@ -4,6 +4,7 @@ import re
 import json
 import os
 from datetime import datetime
+from config import obtener_configuraciones, resolver_ruta
 
 # URL directa del Compendio
 URL_COMPENDIO = "https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_sp.html"
@@ -123,8 +124,9 @@ def extraer_compendio(url):
     return numerales
 
 def obtener_corpus_compendio(modo="estatico", archivo_backup="corpus_compendio_v1.json"):
-    directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "data")
+    settings = obtener_configuraciones()
+    # Zona Bronze: crudos (_v1.json) guardados en la carpeta configurada
+    carpeta_salida = resolver_ruta(settings.paths.raw_corpus_dir)
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":
@@ -143,7 +145,8 @@ def obtener_corpus_compendio(modo="estatico", archivo_backup="corpus_compendio_v
             os.makedirs(carpeta_salida, exist_ok=True)
             
             documento_maestro = {
-                "nivel_jerarquico": 1, 
+                "nivel_jerarquico": 1,
+                "tipo_corpus": "corpus_compendio",
                 "fuente": "Compendio de la Doctrina Social de la Iglesia",
                 "url_origen": URL_COMPENDIO, 
                 "fecha_generacion": datetime.now().strftime("%Y-%m-%d-%H:%M:%S"),

@@ -5,6 +5,7 @@ import json
 import time
 import os
 from datetime import datetime
+from config import obtener_configuraciones, resolver_ruta
 
 # --- URLs BASE ---
 BASE_URL_VAT2 = "https://www.vatican.va/archive/hist_councils/ii_vatican_council/"
@@ -192,8 +193,9 @@ def ejecutar_scraping_decretos():
     return corpus_decretos
 
 def obtener_corpus_decretos(modo="estatico", archivo_backup="corpus_decretos_v1.json", max_intentos=3):
-    directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "data")
+    settings = obtener_configuraciones()
+    # Zona Bronze: crudos (_v1.json) guardados en la carpeta configurada
+    carpeta_salida = resolver_ruta(settings.paths.raw_corpus_dir)
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":
@@ -213,7 +215,8 @@ def obtener_corpus_decretos(modo="estatico", archivo_backup="corpus_decretos_v1.
                 os.makedirs(carpeta_salida, exist_ok=True)
                 
                 documento_maestro = {
-                    "nivel_jerarquico": 1, 
+                    "nivel_jerarquico": 1,
+                    "tipo_corpus": "corpus_decretos",
                     "fuente": "Decretos - Concilio Vaticano II",
                     "fecha_generacion": datetime.now().strftime("%Y-%m-%d-%H:%M:%S"),
                     "total_numerales": len(corpus_fresco),

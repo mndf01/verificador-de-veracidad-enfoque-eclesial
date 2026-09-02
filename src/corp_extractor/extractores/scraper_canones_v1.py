@@ -1,4 +1,5 @@
 import requests
+from config import obtener_configuraciones, resolver_ruta
 from bs4 import BeautifulSoup
 import re
 import json
@@ -193,8 +194,9 @@ def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_cano
     # Esto asegura que sin importar desde dónde ejecutes el script, 
     # siempre apuntará a la carpeta 'datos' en la raíz del proyecto.
     # =====================================================================
-    directorio_script = os.path.dirname(os.path.abspath(__file__))
-    carpeta_salida = os.path.join(directorio_script, "data")
+    settings = obtener_configuraciones()
+    # Zona Bronze: crudos (_v1.json) guardados en la carpeta configurada
+    carpeta_salida = resolver_ruta(settings.paths.raw_corpus_dir)
     ruta_completa = os.path.join(carpeta_salida, archivo_backup)
 
     if modo == "estatico":
@@ -221,6 +223,7 @@ def obtener_corpus_canonico(modo="estatico", archivo_backup="corpus_derecho_cano
                 # --- EMPAQUETADO DEL DOCUMENTO MAESTRO ---
                 documento_maestro = {
                     "nivel_jerarquico": 2,
+                    "tipo_corpus": "corpus_canones",
                     "fuente": "Código de Derecho Canónico",
                     "fecha_generacion": datetime.now().strftime("%Y-%m-%d-%H:%M:%S"),
                     "total_canones": len(corpus_fresco),

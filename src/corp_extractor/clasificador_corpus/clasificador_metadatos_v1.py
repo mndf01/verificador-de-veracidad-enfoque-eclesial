@@ -102,8 +102,10 @@ def clasificar_archivo(archivo_entrada, archivo_salida):
 # 3. EJECUCIÓN DEL SCRIPT
 # =====================================================================
 if __name__ == '__main__':
-    directorio_datos_in = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "extractores", "data")
-    directorio_datos_out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datos")
+    from config import obtener_configuraciones, resolver_ruta
+    settings = obtener_configuraciones()
+    directorio_datos_in = resolver_ruta(settings.paths.raw_corpus_dir)
+    directorio_datos_out = resolver_ruta(settings.paths.corpus_dir)
     
     # Mapeo de archivos de entrada -> archivos de salida clasificados
     archivos_a_procesar = [

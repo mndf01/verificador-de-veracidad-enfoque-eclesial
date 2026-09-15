@@ -1,5 +1,6 @@
 import json, logging, chromadb, chromadb.errors
 from glob import glob
+from importlib.metadata import metadata
 
 from src.base_datos.embeddings import obtener_funcion_embedding
 from config import obtener_configuraciones, resolver_ruta
@@ -15,7 +16,7 @@ def _get_cliente():
     return chromadb.PersistentClient(path=str(ruta))
 
 
-def get_coleccion(con_embedding=True, coleccion=None):
+def get_coleccion(con_embedding=True, coleccion=None, crear=True):
     """
     Obtiene/crea la coleccion con la funcion de embedding y el espacio coseno
     Coleccion default `corpus_canonico`
@@ -25,11 +26,15 @@ def get_coleccion(con_embedding=True, coleccion=None):
 
     funcion = obtener_funcion_embedding() if con_embedding else None
     coleccion = settings.chroma.coleccion if coleccion is None else coleccion
-    return cliente.get_or_create_collection(
-        name=coleccion,
-        embedding_function=funcion,
-        metadata={"hnsw:space": settings.chroma.espacio_hnsw} # coseno
-    )
+
+    if crear:
+        return cliente.get_or_create_collection(
+            name=coleccion,
+            embedding_function=funcion,
+            metadata={"hnsw:space": settings.chroma.espacio_hnsw} # coseno
+        )
+    else:
+        return cliente.get_collection(name=coleccion, embedding_function=funcion)
 
 def _normalizar_item(datos, tipo_corpus, fuente):
     """
@@ -71,6 +76,7 @@ def reindexar_corpus():
         pass
     return indexar_corpus()
 
+
 def indexar_corpus():
     """
     Indexa los archivos .json clasificados de corpus_dir en ChormaDB.
@@ -102,7 +108,7 @@ def indexar_corpus():
             meta_t.extend(meta)
 
             print("Indexando...")
-            for i in range(0, len(ids_t), batch):
+            for i in range(0, len(ids), batch):
                 coleccion.upsert(
                     ids=ids[i:i + batch],
                     documents=docs[i:i + batch],
@@ -167,5 +173,39 @@ def verificar_corpus_indexado() -> dict:
     huerfanos_t = sorted(ids_bd - ids_esperados)
     return {"ok": not faltantes_t and not huerfanos_t, "total_bd": len(ids_bd), "total_esperado": len(ids_esperados), "por_tipo": por_tipo, "ids_faltantes": faltantes_t, "ids_huerfanos": huerfanos_t}
 
+
+def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) -> list[dict]:
+    coleccion = get_coleccion(coleccion="corpus_canonico", crear=False)
+
+    if coleccion.count() == 0:
+        logging.warning("La coleccion no tiene documentos indexados")
+        return []
+
+    result = coleccion.query(query_texts=[premisa], n_results=n_resultados, where=where, include=["metadatas", "documents", "distances"])
+
+    ids       = result["ids"][0]
+    metadatas = result["metadatas"][0]
+    documents = result["documents"][0]
+    distances = result["distances"][0]
+
+    contratos = []
+    for id, meta, document, distance in zip(ids, metadatas, documents, distances):
+        contratos.append({
+            "texto": document,
+            "similitud": 1 - distance,
+            "contexto": meta["contexto_jerarquico"],
+            "fuente": meta["fuente"],
+            "id_norma": meta["id_norma"],
+            "tipo_corpus": meta["tipo_corpus"],
+            "categoria": meta["categoria"],
+            "nivel_autoridad": meta["nivel_autoridad"]
+        })
+
+    return contratos
+
+# TODO falta normalizar las citas
 if __name__ == "__main__":
-    indexar_corpus()
+    contratos = consultar(premisa="Participar de la eucaristía")
+    for item in contratos:
+        for key, value in item.items():
+            print(f"{key}: {value}")

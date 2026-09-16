@@ -37,6 +37,7 @@ class ChromaConfig(BaseModel):
     espacio_hnsw: str
     telemetria: bool
     batch_size: int
+    max_results: int
 
 class CorpExtractorConfig(BaseModel):
     modo_ejecucion: str

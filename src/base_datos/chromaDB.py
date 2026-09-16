@@ -5,7 +5,7 @@ from importlib.metadata import metadata
 from src.base_datos.embeddings import obtener_funcion_embedding
 from config import obtener_configuraciones, resolver_ruta
 
-
+condiciones_validas = {"fuente", "tipo_corpus", "id_norma", "contexto_jerarquico", "categoria", "nivel_autoridad", "url_origen"}
 def _get_cliente():
     """
     Crea el cliente persistente con la carpeta configurada
@@ -20,6 +20,7 @@ def get_coleccion(con_embedding=True, coleccion=None, crear=True):
     """
     Obtiene/crea la coleccion con la funcion de embedding y el espacio coseno
     Coleccion default `corpus_canonico`
+    :returns: Collection or None
     """
     settings = obtener_configuraciones()
     cliente = _get_cliente()
@@ -34,7 +35,11 @@ def get_coleccion(con_embedding=True, coleccion=None, crear=True):
             metadata={"hnsw:space": settings.chroma.espacio_hnsw} # coseno
         )
     else:
-        return cliente.get_collection(name=coleccion, embedding_function=funcion)
+        try:
+            return cliente.get_collection(name=coleccion, embedding_function=funcion)
+        except chromadb.errors.NotFoundError as e:
+            logging.error("Coleccion no encontrada: %s", e)
+            return None
 
 def _normalizar_item(datos, tipo_corpus, fuente):
     """
@@ -84,11 +89,14 @@ def indexar_corpus():
     :return: lista de archivos que no pudieron ser indexados
     """
     coleccion = get_coleccion()
+    if coleccion is None:
+        return []
+
     settings = obtener_configuraciones()
     ruta = resolver_ruta(settings.paths.corpus_dir) + "/*_clasificado.json"
     batch = settings.chroma.batch_size
 
-    ids_t, docs_t, meta_t, errores = [], [], [], []
+    errores = []
     for archivo in glob(ruta):
         try:
             print("\n\nArchivo: ", archivo)
@@ -103,10 +111,6 @@ def indexar_corpus():
             ids, docs, meta = _normalizar_item(data['datos'], tipo_corpus, fuente)
 
             print(f"Datos leidos, ids: {len(ids)}, docs: {len(docs)}, meta: {len(meta)}")
-            ids_t.extend(ids)
-            docs_t.extend(docs)
-            meta_t.extend(meta)
-
             print("Indexando...")
             for i in range(0, len(ids), batch):
                 coleccion.upsert(
@@ -152,10 +156,7 @@ def verificar_corpus_indexado() -> dict:
         conteo_esperado_por_corpus[tipo_corpus] = conteo_esperado_por_corpus.get(tipo_corpus, 0) + len(ids)
 
     # 2 -- Obtiene la cantidad de IDs en la BD por corpus
-    try:
-        coleccion = get_coleccion(con_embedding=False)
-    except chromadb.errors.NotFoundError:
-        return {"ok": False, "total_bd": 0, "total_esperado": len(ids_esperados), "por_tipo": {}, "ids_faltantes": sorted(ids_esperados), "ids_huerfanos": [], "error": "coleccion no existe"}
+    coleccion = get_coleccion(con_embedding=False)
 
     ids_bd = set(coleccion.get(include=[])["ids"])
     por_tipo = {}
@@ -174,14 +175,108 @@ def verificar_corpus_indexado() -> dict:
     return {"ok": not faltantes_t and not huerfanos_t, "total_bd": len(ids_bd), "total_esperado": len(ids_esperados), "por_tipo": por_tipo, "ids_faltantes": faltantes_t, "ids_huerfanos": huerfanos_t}
 
 
-def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) -> list[dict]:
-    coleccion = get_coleccion(coleccion="corpus_canonico", crear=False)
 
-    if coleccion.count() == 0:
+def _normalizar_cita(meta) -> str:
+    """Cita legible de la norma, derivada de la metadata del chunk.
+
+    - CIC y Compendio: no hay documento en el contexto.
+    - Vaticano II: el documento es el 3er segmento del contexto; si
+      id_norma == 0 la unidad es una sección sin numerar (PROEMIO, ...).
+    """
+    tipo = meta["tipo_corpus"]
+    segmentos = meta["contexto_jerarquico"].split(" > ")
+
+    if tipo == "corpus_canones":
+        return f"CIC, canon {meta['id_norma']}"
+    if tipo == "corpus_compendio":
+        return f"Compendio, numeral {meta['id_norma']}"
+
+    etiquetas = {
+        "corpus_constituciones": "Constitución",
+        "corpus_declaraciones": "Declaración",
+        "corpus_decretos": "Decreto",
+    }
+    etiqueta = etiquetas.get(tipo, meta["fuente"])
+    documento = segmentos[2] if len(segmentos) >= 3 else meta["fuente"]
+
+    if meta["id_norma"] == 0:
+        seccion = segmentos[3] if len(segmentos) >= 4 else ""
+        return f"{etiqueta} {documento} (Concilio Vaticano II), {seccion}"
+    return f"{etiqueta} {documento} (Concilio Vaticano II), numeral {meta['id_norma']}"
+
+
+def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) -> list[dict]:
+    """
+    Consultar documentos indexados en una colección bajo ciertas condiciones, retornando resultados
+    ordenados según la similitud con la premisa dada.
+
+    El método realiza validaciones iniciales sobre los parámetros de entrada y, en caso de que las
+    condiciones no se cumplan, devuelve una lista vacía. Si las condiciones son válidas, se intenta
+    realizar una consulta a la colección especificada, considerando las condiciones adicionales
+    proporcionadas en el parámetro where.
+
+    :param premisa: Cadena de texto que representa la consulta o premisa para buscar documentos
+        relacionados.
+    :type premisa: str
+
+    :param n_resultados: Número máximo de resultados que se desean obtener. Debe ser un valor
+        entero mayor a cero. Por defecto, es 5.
+    :type n_resultados: int
+
+    :param where: Diccionario opcional que contiene condiciones adicionales para filtrar los
+        resultados. Las claves válidas son: "fuente", "tipo_corpus", "id_norma", "contexto_jerarquico",
+        "categoria", "nivel_autoridad", y "url_origen".
+    :type where: dict | None
+
+    :return: Una lista de diccionarios, donde cada diccionario contiene información estructurada de
+        un documento relevante, incluyendo su similitud, texto, contexto, fuente y otros metadatos
+        relacionados. Si no se encuentran documentos relevantes o ocurren errores, devuelve una lista
+        vacía.
+    :rtype: list[dict]
+    """
+    settings = obtener_configuraciones()
+    coleccion = get_coleccion(coleccion=settings.chroma.coleccion, crear=False)
+
+
+    if coleccion is None:
+        return []
+    elif not isinstance(premisa, str):
+        logging.warning("La premisa debe ser un string")
+        return []
+    elif not premisa.strip():
+        logging.warning("No se ingreso una premisa para la consulta")
+        return []
+
+    if where is not None:
+        if not isinstance(where, dict):
+            logging.warning("El parametro where debe ser un diccionario")
+            return []
+        elif not all(k in condiciones_validas for k in where.keys()):
+            logging.warning("El parametro where contiene keys invalidas")
+            return []
+
+    try:
+        n_resultados = int(n_resultados)
+    except ValueError:
+        logging.error("El número de resultados debe ser un entero")
+        return []
+
+    if n_resultados <= 0:
+        logging.warning("El número de resultados debe ser mayor a cero")
+        return []
+
+    count = coleccion.count()
+    if count == 0:
         logging.warning("La coleccion no tiene documentos indexados")
         return []
 
-    result = coleccion.query(query_texts=[premisa], n_results=n_resultados, where=where, include=["metadatas", "documents", "distances"])
+    try:
+        result = coleccion.query(query_texts=[premisa], n_results=min(n_resultados, count, settings.chroma.max_results),
+                                 where=where, include=["metadatas", "documents", "distances"])
+    except chromadb.errors.ChromaError as e:
+        logging.error("Error al consultar la coleccion de ChromaDB: %s", str(e))
+        return []
+
 
     ids       = result["ids"][0]
     metadatas = result["metadatas"][0]
@@ -189,23 +284,28 @@ def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) ->
     distances = result["distances"][0]
 
     contratos = []
-    for id, meta, document, distance in zip(ids, metadatas, documents, distances):
+    for id_chroma, meta, document, distance in zip(ids, metadatas, documents, distances):
         contratos.append({
+            "id_chroma": id_chroma,
             "texto": document,
-            "similitud": 1 - distance,
+            "similitud": max(1 - distance, 0),
             "contexto": meta["contexto_jerarquico"],
             "fuente": meta["fuente"],
             "id_norma": meta["id_norma"],
             "tipo_corpus": meta["tipo_corpus"],
             "categoria": meta["categoria"],
-            "nivel_autoridad": meta["nivel_autoridad"]
+            "nivel_autoridad": meta["nivel_autoridad"],
+            "url_origen": meta.get("url_origen") or "Sin url registrada",
+            "cita": _normalizar_cita(meta)
         })
 
     return contratos
 
-# TODO falta normalizar las citas
+
 if __name__ == "__main__":
-    contratos = consultar(premisa="Participar de la eucaristía")
+    contratos = consultar(premisa="El bautismo esta prohibido")
     for item in contratos:
         for key, value in item.items():
             print(f"{key}: {value}")
+        print()
+        print()

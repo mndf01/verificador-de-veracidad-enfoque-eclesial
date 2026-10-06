@@ -76,11 +76,26 @@ tesis/
 │   │   └── clasificador_corpus/
 │   │       └── clasificador_metadatos_v1.py   # Inyecta categoria + nivel_autoridad
 │   │
+│   ├── expansion_dinamica/  # Carga transitoria de UN PDF externo (aislada del corpus base)
+│   │   ├── sesion.py        # SesionExpansion: API pública (cargar_pdf / consultar / consultar_combinado)
+│   │   ├── procesamiento.py # procesar_pdf(): extraer → limpiar → segmentar (sin Chroma)
+│   │   ├── extractor_pdf.py # PDF → texto por página (sin OCR; valida tamaño/escaneado/contraseña)
+│   │   ├── columnas.py      # PDF de 2 columnas: detecta el canal y reconstruye el orden de lectura
+│   │   ├── limpieza.py      # encabezados, pies, n.º de página, guiones, ligaturas
+│   │   ├── segmentador.py   # Regex: artículos/cánones/numerales → fragmentos + contexto jerárquico
+│   │   ├── parametros.py    # ParametrosExpansion (lee [expansion_dinamica] de config.toml)
+│   │   ├── errores.py       # ExpansionError y subclases (mensajes aptos para la interfaz)
+│   │   └── tipos.py         # dataclasses internas
+│   │
 │   ├── procesamiento_nlp/
 │   │   └── tesauro.json     # Tesauro de categorías (insumo del IVR)
 │   │
 │   └── web_extractor/       # Extracción de contenido de noticias (pendiente)
 │       └── web_extractor.py # Boceto con trafilatura
+│
+├── tests/
+│   ├── test_expansion_dinamica.py   # pruebas del módulo de expansión dinámica
+│   └── ejemplos/                    # PDF de ejemplo (1 y 2 columnas) para probarlo a mano
 │
 └── data/               # ⚠️ IGNORADA por git — se regenera con el ETL
    ├── corp_extractor/
@@ -186,6 +201,120 @@ Lee cada `*_clasificado.json` de `corpus_dir`, normaliza items a `(ids, document
 
 *Pendiente: `web_extractor` (trafilatura) + heurísticas IVR + Random Forest.*
 
+### 5. Expansión dinámica (PDF externo, transitorio)
+
+Permite que el usuario cargue **un PDF normativo propio** (p. ej. un decreto diocesano) durante la sesión de validación, y que la noticia se contraste **también** contra ese documento, **sin tocar el corpus base** (`corpus_canonico`). Todo vive en memoria y desaparece al cerrar la sesión.
+
+> **Alcance:** solo PDF con **texto seleccionable**. No hace OCR: un PDF escaneado (imágenes) se rechaza con un mensaje claro.
+
+#### Uso mínimo
+
+```python
+from src.expansion_dinamica import SesionExpansion, ExpansionError
+
+sesion = SesionExpansion()          # UNA por usuario (en Streamlit: guardarla en st.session_state)
+
+try:
+    resumen = sesion.cargar_pdf(archivo, nivel_autoridad=0.33)   # ruta, bytes o archivo subido
+except ExpansionError as e:
+    print(e)                        # mensaje listo para mostrar al usuario
+else:
+    print(resumen.fragmentos, resumen.esquema, resumen.advertencias)
+
+# Corpus base + PDF cargado, ordenados juntos por similitud (n_resultados en total)
+evidencias = sesion.consultar_combinado("El obispo puede dispensar...", n_resultados=5)
+
+sesion.cerrar()                     # descarta todo (o usar:  with SesionExpansion() as s: ...)
+```
+
+| Método | Qué hace |
+|---|---|
+| `cargar_pdf(archivo, nombre=None, *, nivel_autoridad=None, categoria=None, url_origen=None)` | Procesa e indexa un PDF. Devuelve un `ResumenDocumento` (`doc_id`, `nombre`, `paginas`, `fragmentos`, `esquema`, `nivel_autoridad`, `categoria`, `advertencias`, `ya_cargado`). Cargar el mismo PDF dos veces no lo duplica. |
+| `consultar(premisa, n_resultados=5)` | Busca **solo** en los PDF cargados. |
+| `consultar_combinado(premisa, n_resultados=5, where_base=None)` | Busca en el corpus base **y** en los PDF cargados. Sin PDF cargados devuelve exactamente lo que devolvería `chromaDB.consultar`. |
+| `documentos()` / `eliminar_documento(doc_id)` / `cerrar()` | Gestión de lo cargado en la sesión. |
+
+#### Qué devuelve cada resultado
+
+Las mismas claves que `chromaDB.consultar()`, más cuatro extras. **Quien calcule el IVR puede tratar ambas fuentes igual**: las similitudes son comparables (mismo modelo de embeddings y mismo espacio coseno).
+
+| Clave | Contenido |
+|---|---|
+| `id_chroma`, `texto`, `similitud`, `contexto`, `fuente`, `id_norma`, `tipo_corpus`, `categoria`, `nivel_autoridad`, `url_origen`, `cita` | Igual que el corpus base. En un PDF cargado: `tipo_corpus = "expansion_dinamica"`, `id_norma` = n.º de artículo/canon/numeral (0 si la unidad no está numerada), `cita` = p. ej. `Decreto 12/2024, Artículo 4, p. 2`. |
+| `origen` | `"corpus_base"` o `"expansion_dinamica"`. Sirve para distinguir de dónde viene cada evidencia. |
+| `doc_id`, `pagina_inicio`, `pagina_fin` | Solo en resultados de un PDF cargado. |
+
+**`nivel_autoridad`** (Coeficiente Jerárquico del IVR): lo elige el usuario entre **0.33** (Nivel 1, norma local — valor por defecto), **0.66** (Nivel 2) y **1.0** (Nivel 3). Cualquier otro valor lanza `NivelAutoridadInvalidoError`.
+
+#### Parámetros (`[expansion_dinamica]` en `config.toml`)
+
+| Parámetro | Por defecto | Qué controla |
+|---|---|---|
+| `max_mb` | `20` | Tamaño máximo del PDF. |
+| `max_paginas` | `300` | Páginas máximas. |
+| `min_caracteres_por_pagina` | `100` | Una página con menos texto se considera "sin texto" (escaneada o imagen). |
+| `max_fraccion_paginas_vacias` | `0.5` | Si más de esta fracción de páginas no tiene texto, el PDF se rechaza por escaneado. |
+| `detectar_columnas` | `true` | Reordena PDFs de dos columnas (ver más abajo). |
+| `palabras_max_chunk` | `500` | Una unidad (artículo/canon) más larga se divide en partes de este tamaño máximo. |
+| `palabras_min_chunk` | `20` | Por debajo se emite una advertencia (los textos muy breves dan embeddings poco fiables). |
+| `nivel_autoridad_default` | `0.33` | Nivel por defecto si el usuario no elige. |
+| `categoria_default` | `"Normativa Externa (carga dinámica)"` | Categoría por defecto de lo cargado. |
+
+También reutiliza `chroma.espacio_hnsw`, `chroma.batch_size`, `chroma.max_results` y `chroma.telemetria`.
+
+#### Errores y advertencias que la interfaz debe mostrar
+
+Todas las excepciones heredan de `ExpansionError`, así que alcanza con un solo `except`; el mensaje ya está redactado para el usuario.
+
+| Excepción | Cuándo |
+|---|---|
+| `PdfInvalidoError` | No es un PDF, está vacío, dañado o protegido con contraseña. |
+| `PdfExcedeLimiteError` | Supera `max_mb` o `max_paginas`. |
+| `PdfSinTextoNativoError` | Escaneado o formado por imágenes (no hay OCR). |
+| `DocumentoSinContenidoError` | Tras limpiar el texto no quedó nada utilizable. |
+| `NivelAutoridadInvalidoError` | `nivel_autoridad` no es 0.33, 0.66 ni 1.0. |
+
+`resumen.advertencias` **no son errores**: avisos para mostrar al usuario (p. ej. "no se detectó estructura normativa, se cortó por ventanas", "numeración con huecos", "se detectó maquetación en dos columnas", "páginas sin texto").
+
+#### Cómo funciona por dentro
+
+1. **Validación:** formato PDF, tamaño, páginas, contraseña y si es un escaneado.
+2. **Extracción** del texto de cada página. Si el PDF es de **dos columnas**, se leen las coordenadas de cada palabra (`pdfplumber`) y se reconstruye el orden de lectura: título a todo el ancho → columna izquierda → columna derecha → pie. Es conservador: ante tres columnas, tablas o notas al margen deja el texto como está.
+3. **Limpieza:** quita encabezados y pies repetidos y números de página, une las palabras cortadas con guion al final de línea y normaliza ligaturas.
+4. **Segmentación por expresiones regulares**, en este orden: *articulado* (`Artículo N`, `Can. N`, con `LIBRO/TÍTULO/CAPÍTULO` y subtítulos como contexto jerárquico) → *numerado* (`12. Texto…` con numeración creciente) → *ventanas* de ~500 palabras si no hay estructura.
+5. **Indexación** en una colección propia de un cliente Chroma **en memoria** (`EphemeralClient`), con el mismo modelo de embeddings que el corpus base. Nunca se escribe en `chroma_dir`. Si falla a mitad de camino, la carga se revierte.
+6. **Consulta:** busca en el PDF (y, si se pide, en el corpus base) y devuelve todo en el mismo formato.
+
+#### Límites conocidos
+
+- **Sin OCR.** Tres o más columnas y tablas: se deja el texto como sale, con riesgo de mezcla.
+- Un documento con formato muy atípico cae a **ventanas** (la cita apunta a páginas, no a artículos); siempre hay una advertencia.
+- La sesión vive en la memoria del proceso: si se reinicia la aplicación hay que volver a cargar el PDF.
+- Costo: un PDF de una columna añade <1 s de análisis; uno de dos columnas, ~0.1 s por página (300 páginas ≈ 30 s). Se apaga con `detectar_columnas = false`.
+- Probado con PDF generados a partir del propio corpus (cánones y numerales: 98–100 % de unidades idénticas al original) y con PDF de ejemplo. **Falta probarlo con PDF reales de otras fuentes.**
+
+#### Probar
+
+```bash
+python -m unittest discover -s tests         # pruebas (o: pytest tests — requiere pip install -e ".[dev]")
+
+# Solo cortar el documento y ver cómo lo segmenta (NO carga el modelo SBERT):
+python -m src.expansion_dinamica tests/ejemplos/decreto_diocesano_ejemplo.pdf --solo-segmentar
+python -m src.expansion_dinamica tests/ejemplos/decreto_dos_columnas_ejemplo.pdf --solo-segmentar
+
+# Cargar y consultar de verdad (usa el modelo SBERT):
+python -m src.expansion_dinamica ruta/al/documento.pdf --premisa "texto de la noticia"
+
+# Comprobar que config.toml se lee bien:
+python -c "from config import obtener_configuraciones as o; print(o().expansion_dinamica)"
+```
+
+**Problemas frecuentes**
+
+- `No module named 'chromadb'` (u otra librería): activar el entorno virtual e instalar con `pip install -e .`.
+- `CERTIFICATE_VERIFY_FAILED` al cargar el modelo: lo causa un proxy o antivirus que intercepta la conexión. No es grave si el modelo ya está en la caché local; el programa sigue con él.
+- La primera ejecución descarga el modelo SBERT (~470 MB).
+
 ---
 
 ## Notas para el equipo
@@ -207,3 +336,4 @@ Lee cada `*_clasificado.json` de `corpus_dir`, normaliza items a `(ids, document
 | Extracción de noticias (web_extractor) | ⏳ |
 | IVR (heurísticas semánticas + tesauro) | ⏳ |
 | Random Forest + veredicto | ⏳ |
+| Expansión dinámica (PDF externo, transitorio) | ✅ módulo + pruebas · ⏳ conectar con la interfaz y con el IVR |

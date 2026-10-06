@@ -19,9 +19,20 @@ dependencies = [
     # Extracción de contenido web (noticias)
     "trafilatura>=1.8",
 
+    # Expansión dinámica: lectura de PDF con texto nativo (sin OCR)
+    "pypdf>=5.0",
+    "pdfplumber>=0.11",   # posición de las palabras: detecta PDFs de dos columnas
+
     # IVR / modelo (Random Forest) — usadas por el módulo de decisión
     "pandas>=2.2",
     "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+# pip install -e ".[dev]"  → para correr las pruebas (tests/)
+dev = [
+    "pytest>=8",
+    "reportlab>=4",   # genera los PDF de prueba
 ]
 
 [tool.setuptools]

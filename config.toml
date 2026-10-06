@@ -19,3 +19,21 @@ max_results = 30
 [corp_extractor]
 # Modo de ejecucion de los extractores: # Usar "dinamico" para forzar la descarga web desde vatican.va, o "estatico" desde local si existen documentos
 modo_ejecucion = "estatico"
+
+[expansion_dinamica]
+# Carga transitoria de UN PDF normativo externo durante la sesion (no se mezcla con corpus_canonico).
+# El sistema NO hace OCR: solo acepta PDF con texto seleccionable.
+max_mb = 20
+max_paginas = 300
+# Una pagina con menos caracteres que esto se considera "sin texto" (escaneada/imagen).
+min_caracteres_por_pagina = 100
+# Si mas de esta fraccion de paginas no tiene texto, el PDF se rechaza por escaneado.
+max_fraccion_paginas_vacias = 0.5
+# Reordena PDFs de dos columnas para leer cada columna completa (requiere pdfplumber).
+detectar_columnas = true
+# Tamano de los fragmentos; una unidad (articulo/canon) mas larga se divide en partes.
+palabras_max_chunk = 500
+palabras_min_chunk = 20
+# Nivel de autoridad por defecto: 0.33 = Nivel 1 (norma local). Valores validos: 0.33, 0.66, 1.0
+nivel_autoridad_default = 0.33
+categoria_default = "Normativa Externa (carga dinámica)"

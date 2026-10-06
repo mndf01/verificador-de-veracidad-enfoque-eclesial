@@ -43,6 +43,19 @@ class CorpExtractorConfig(BaseModel):
     modo_ejecucion: str
 
 
+class ExpansionDinamicaConfig(BaseModel):
+    """Carga transitoria de un PDF externo. Los defaults coinciden con config.toml."""
+    max_mb: float = 20.0
+    max_paginas: int = 300
+    min_caracteres_por_pagina: int = 100
+    max_fraccion_paginas_vacias: float = 0.5
+    detectar_columnas: bool = True
+    palabras_max_chunk: int = 500
+    palabras_min_chunk: int = 20
+    nivel_autoridad_default: float = 0.33
+    categoria_default: str = "Normativa Externa (carga dinámica)"
+
+
 # TODO -> para agregar otros config files tipo .env falta adaptar esta clase para que lea.
 class Settings(BaseSettings):
     models: ModelsConfig
@@ -51,6 +64,9 @@ class Settings(BaseSettings):
         
     #extractor del corpus vaticano
     corp_extractor: CorpExtractorConfig
+
+    # expansion dinamica: PDF externo cargado por el usuario (transitorio)
+    expansion_dinamica: ExpansionDinamicaConfig = ExpansionDinamicaConfig()
 
     model_config = SettingsConfigDict(
         toml_file=CONFIG_PATH

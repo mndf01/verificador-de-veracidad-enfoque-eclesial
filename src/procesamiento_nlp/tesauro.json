@@ -53,6 +53,42 @@
       "variaciones_lexicas": ["Expulsado de la iglesia", "Echado de la iglesia", "Desterrado"],
       "categoria": "Derecho Penal Eclesiástico",
       "nivel_autoridad": 0.8
+    },
+    "ID_SUSPENSION": {
+      "termino_canonico": "Suspensión",
+      "variaciones_lexicas": ["Cura inhabilitado", "Sacerdote castigado", "Prohibición de dar misa", "Cura sancionado"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },
+    "ID_APOSTASIA": {
+      "termino_canonico": "Apostasía",
+      "variaciones_lexicas": ["Renuncia a la iglesia", "Abandono de la fe", "Salirse de la religión", "Apostatar"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },
+    "ID_CISMA": {
+      "termino_canonico": "Cisma",
+      "variaciones_lexicas": ["División de la iglesia", "Separación del Vaticano", "Rebelión contra el Papa", "Iglesia paralela"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },
+    "ID_HEREJIA": {
+      "termino_canonico": "Herejía",
+      "variaciones_lexicas": ["Falsa doctrina", "Enseñanza prohibida", "Hereje", "Ir contra la fe"],
+      "categoria": "Derecho Penal Eclesiástico",
+      "nivel_autoridad": 0.8
+    },
+    "ID_LAICO": {
+      "termino_canonico": "Laico",
+      "variaciones_lexicas": ["Seglar", "Feligrés común", "Creyente de a pie", "Católico no cura", "Civil"],
+      "categoria": "Derechos y Obligaciones de los Fieles",
+      "nivel_autoridad": 0.8
+    },
+    "ID_ECUMENISMO": {
+      "termino_canonico": "Ecumenismo",
+      "variaciones_lexicas": ["Diálogo interreligioso", "Unión de iglesias", "Reunión con otras religiones", "Apertura a otros credos"],
+      "categoria": "Doctrina Social y Política",
+      "nivel_autoridad": 0.6
     }
   }
 }

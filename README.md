@@ -88,6 +88,7 @@ tesis/
 │   │   └── tipos.py         # dataclasses internas
 │   │
 │   ├── procesamiento_nlp/
+│   │   ├── tesauro_tools.py # Valida el tesauro y busca candidatos en el corpus (solo lectura)
 │   │   └── tesauro.json     # Tesauro de categorías (insumo del IVR)
 │   │
 │   └── web_extractor/       # Extracción de contenido de noticias (pendiente)
@@ -314,6 +315,20 @@ python -c "from config import obtener_configuraciones as o; print(o().expansion_
 - `No module named 'chromadb'` (u otra librería): activar el entorno virtual e instalar con `pip install -e .`.
 - `CERTIFICATE_VERIFY_FAILED` al cargar el modelo: lo causa un proxy o antivirus que intercepta la conexión. No es grave si el modelo ya está en la caché local; el programa sigue con él.
 - La primera ejecución descarga el modelo SBERT (~470 MB).
+
+### 6. Tesauro: validar y buscar candidatos
+
+Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (nunca lo modifica; el tesauro se sigue editando a mano):
+
+```bash
+python -m src.procesamiento_nlp.tesauro_tools validar
+python -m src.procesamiento_nlp.tesauro_tools candidatos --top 40 --salida candidatos.csv
+```
+
+- **`validar`** revisa el formato y avisa de lo que afecta a la recuperación: términos repetidos entre conceptos (*error*), términos canónicos que el corpus no usa (*aviso*, e indica cómo lo escribe el corpus), palabras sueltas muy comunes que pueden ser ambiguas y categorías que el clasificador del corpus no conoce. Devuelve código 1 si hay errores.
+- **`candidatos`** lista frases frecuentes del corpus que todavía no están en el tesauro. Habrá ruido: se revisa a mano. El CSV se abre en Excel con las tildes bien.
+- **Peso de autoridad:** el equipo acordó que es **solo el del documento** (lo asigna el clasificador del corpus). Los conceptos del tesauro no necesitan `nivel_autoridad`; si existe se acepta, pero no se usa.
+- Necesita el corpus crudo (`src/corp_extractor/extractores/data/corpus_*_v1.json`) en la máquina; sin él, `validar` solo revisa el formato.
 
 ---
 

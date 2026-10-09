@@ -79,7 +79,10 @@ def clasificar_archivo(archivo_entrada, archivo_salida):
 
         if tipo_regla == "CANONICO":
             for libro, cat in reglas_activas["mapeo_interno"].items():
-                if libro in contexto:
+                # El libro debe coincidir como palabra completa: con `libro in contexto`, "LIBRO I"
+                # también coincidía con "LIBRO II", "LIBRO III"... y todos los cánones quedaban
+                # clasificados como Libro I.
+                if re.search(rf"(?<!\w){re.escape(libro)}(?!\w)", contexto):
                     categoria_asignada = cat
                     break
         

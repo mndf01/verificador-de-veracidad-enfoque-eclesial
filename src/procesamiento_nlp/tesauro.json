@@ -185,7 +185,7 @@
     },
     "ID_PENITENCIA": {
       "termino_canonico": "Sacramento de la penitencia",
-      "variaciones_lexicas": ["Confesión", "Confesarse", "Secreto de confesión", "Sigilo sacramental", "Absolución"],
+      "variaciones_lexicas": ["Confesión sacramental", "Confesarse", "Absolución", "Acto de penitencia"],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CONFIRMACION": {
@@ -244,6 +244,87 @@
       "termino_canonico": "Educación católica",
       "variaciones_lexicas": ["Colegio católico", "Escuela católica", "Universidad católica", "Clases de religión"],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+
+    "ID_SANTA_SEDE": {
+      "termino_canonico": "Santa Sede",
+      "variaciones_lexicas": ["Sede Apostólica", "El Vaticano", "Curia Romana", "Dicasterio"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_CURIA_DIOCESANA": {
+      "termino_canonico": "Vicario general",
+      "variaciones_lexicas": ["Administrador diocesano", "Curia diocesana", "Canciller diocesano", "Vicario judicial"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_DEFENSOR_VINCULO": {
+      "termino_canonico": "Defensor del vínculo",
+      "variaciones_lexicas": ["Promotor de justicia", "Tribunal eclesiástico", "Juez eclesiástico"],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_PENA_LATAE_SENTENTIAE": {
+      "termino_canonico": "Latae sententiae",
+      "variaciones_lexicas": ["Excomunión automática", "Pena automática", "Ferendae sententiae", "Censura eclesiástica"],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_BIENES_TEMPORALES": {
+      "termino_canonico": "Bienes temporales",
+      "variaciones_lexicas": ["Patrimonio eclesiástico", "Inmatriculaciones", "Propiedades de la Iglesia", "Finanzas del Vaticano", "Diezmo"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_DISPENSA": {
+      "termino_canonico": "Causa justa",
+      "variaciones_lexicas": ["Dispensa episcopal", "Dispensar del impedimento", "Dispensa canónica"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_CONSEJOS_EVANGELICOS": {
+      "termino_canonico": "Consejos evangélicos",
+      "variaciones_lexicas": ["Voto de pobreza", "Voto de castidad", "Voto de obediencia", "Profesión religiosa"],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_PAREJAS_HOMOSEXUALES": {
+      "termino_canonico": "Persona humana",
+      "variaciones_lexicas": ["Bendición de parejas gay", "Bendición a homosexuales", "Matrimonio igualitario en la Iglesia", "Parejas del mismo sexo", "Fiducia supplicans"],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_REPRODUCCION_ASISTIDA": {
+      "termino_canonico": "Vida humana",
+      "variaciones_lexicas": ["Fecundación in vitro", "Reproducción asistida", "Vientre de alquiler", "Gestación subrogada", "Embriones congelados"],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_SECRETO_CONFESION": {
+      "termino_canonico": "Sigilo sacramental",
+      "variaciones_lexicas": ["Secreto de confesión", "Inviolabilidad de la confesión", "Obligación de denunciar confesión", "Levantamiento del secreto de confesión"],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_MISA_TRADICIONAL": {
+      "termino_canonico": "Libros litúrgicos",
+      "variaciones_lexicas": ["Misa en latín", "Misa tridentina", "Vetus ordo", "Misa tradicional", "Traditionis custodes"],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_CORRUPCION_FINANCIERA": {
+      "termino_canonico": "Persona jurídica",
+      "variaciones_lexicas": ["Malversación en el Vaticano", "Fraude financiero eclesiástico", "Lavado de dinero Vaticano", "Paraíso fiscal Vaticano"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_DIGNIDAD_HUMANA": {
+      "termino_canonico": "Dignidad humana",
+      "variaciones_lexicas": ["Derechos humanos", "Violación de derechos humanos", "Tortura", "Trata de personas"],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_BIEN_COMUN": {
+      "termino_canonico": "Bien común",
+      "variaciones_lexicas": ["Interés general", "Solidaridad social", "Destino de la sociedad"],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_MEDIOS_COMUNICACION": {
+      "termino_canonico": "Medios de comunicación social",
+      "variaciones_lexicas": ["Prensa", "Redes sociales", "Desinformación", "Fake news en la Iglesia", "Libertad de expresión"],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_TRIBUNALES_ECLESIASTICOS": {
+      "termino_canonico": "Norma del derecho",
+      "variaciones_lexicas": ["Juicio canónico", "Proceso canónico", "Proceso judicial eclesiástico", "Tribunal de la Rota", "Tribunal diocesano"],
+      "categoria": "Derecho Penal Eclesiástico"
     }
   }
 }

@@ -258,8 +258,8 @@
     },
     "ID_DEFENSOR_VINCULO": {
       "termino_canonico": "Defensor del vínculo",
-      "variaciones_lexicas": ["Promotor de justicia", "Tribunal eclesiástico", "Juez eclesiástico"],
-      "categoria": "Sacramentos y Liturgia"
+      "variaciones_lexicas": ["Promotor de justicia", "Defensor del matrimonio", "Juez eclesiástico"],
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_PENA_LATAE_SENTENTIAE": {
       "termino_canonico": "Latae sententiae",
@@ -272,8 +272,8 @@
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_DISPENSA": {
-      "termino_canonico": "Causa justa",
-      "variaciones_lexicas": ["Dispensa episcopal", "Dispensar del impedimento", "Dispensa canónica"],
+      "termino_canonico": "Dispensa",
+      "variaciones_lexicas": ["Dispensa episcopal", "Dispensar del impedimento", "Dispensa canónica", "Causa justa para dispensar"],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CONSEJOS_EVANGELICOS": {
@@ -282,12 +282,12 @@
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_PAREJAS_HOMOSEXUALES": {
-      "termino_canonico": "Persona humana",
+      "termino_canonico": "Uniones homosexuales",
       "variaciones_lexicas": ["Bendición de parejas gay", "Bendición a homosexuales", "Matrimonio igualitario en la Iglesia", "Parejas del mismo sexo", "Fiducia supplicans"],
       "categoria": "Doctrina Social y Política"
     },
     "ID_REPRODUCCION_ASISTIDA": {
-      "termino_canonico": "Vida humana",
+      "termino_canonico": "Fecundación artificial",
       "variaciones_lexicas": ["Fecundación in vitro", "Reproducción asistida", "Vientre de alquiler", "Gestación subrogada", "Embriones congelados"],
       "categoria": "Doctrina Social y Política"
     },
@@ -302,7 +302,7 @@
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CORRUPCION_FINANCIERA": {
-      "termino_canonico": "Persona jurídica",
+      "termino_canonico": "Administración de los bienes",
       "variaciones_lexicas": ["Malversación en el Vaticano", "Fraude financiero eclesiástico", "Lavado de dinero Vaticano", "Paraíso fiscal Vaticano"],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
@@ -322,8 +322,8 @@
       "categoria": "Doctrina Social y Política"
     },
     "ID_TRIBUNALES_ECLESIASTICOS": {
-      "termino_canonico": "Norma del derecho",
-      "variaciones_lexicas": ["Juicio canónico", "Proceso canónico", "Proceso judicial eclesiástico", "Tribunal de la Rota", "Tribunal diocesano"],
+      "termino_canonico": "Juicio contencioso",
+      "variaciones_lexicas": ["Tribunal eclesiástico", "Juicio canónico", "Proceso canónico", "Proceso judicial eclesiástico", "Tribunal de la Rota", "Tribunal diocesano"],
       "categoria": "Derecho Penal Eclesiástico"
     }
   }

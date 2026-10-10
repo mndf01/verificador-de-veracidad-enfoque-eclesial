@@ -1,94 +1,79 @@
 {
   "conceptos": {
     "ID_PAPA": {
-      "termino_canonico": "Sumo Pontífice",
-      "variaciones_lexicas": ["Papa", "Obispo de Roma", "Santo Padre", "Sucesor de Pedro"],
-      "categoria": "Jerarquía y Gobierno Eclesiástico",
-      "nivel_autoridad": 1.0
+      "termino_canonico": "Romano Pontífice",
+      "variaciones_lexicas": ["Sumo Pontífice", "Papa", "Obispo de Roma", "Santo Padre", "Sucesor de Pedro"],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_MATRIMONIO": {
       "termino_canonico": "Vínculo Matrimonial",
       "variaciones_lexicas": ["Matrimonio", "Boda", "Casamiento", "Unión eclesiástica"],
-      "categoria": "Sacramentos y Liturgia",
-      "nivel_autoridad": 0.8
+      "categoria": "Sacramentos y Liturgia"
     },
     "ID_EXPULSION": {
       "termino_canonico": "Expulsión del estado clerical",
-      "variaciones_lexicas": ["Echado", "Expulsado", "Despedido", "Dimisión del estado clerical", "Reducción al estado laical"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "variaciones_lexicas": ["Expulsado del sacerdocio", "Echado del sacerdocio", "Expulsión del sacerdocio", "Dimisión del estado clerical", "Reducción al estado laical"],
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_HUELGA": {
       "termino_canonico": "Huelga",
-      "variaciones_lexicas": ["Derecho de huelga", "Sindicato", "Paro laboral", "Protesta"],
-      "categoria": "Doctrina Social y Política",
-      "nivel_autoridad": 0.6
+      "variaciones_lexicas": ["Derecho de huelga", "Sindicato", "Paro laboral", "Protesta laboral"],
+      "categoria": "Doctrina Social y Política"
     },
     "ID_ABORTO": {
       "termino_canonico": "Aborto",
       "variaciones_lexicas": ["Delito de aborto", "Interrupción del embarazo", "Pro-elección"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_NULIDAD": {
       "termino_canonico": "Nulidad",
-      "variaciones_lexicas": ["Anulación", "Anulación matrimonial", "Matrimonio inválido"],
-      "categoria": "Sacramentos y Liturgia",
-      "nivel_autoridad": 0.8
+      "variaciones_lexicas": ["Anulación matrimonial", "Anulación del matrimonio", "Matrimonio inválido", "Nulidad matrimonial"],
+      "categoria": "Sacramentos y Liturgia"
     },
     "ID_EUTANASIA": {
       "termino_canonico": "Eutanasia",
       "variaciones_lexicas": ["Muerte digna", "Suicidio asistido", "Matar a un enfermo"],
-      "categoria": "Doctrina Social y Política",
-      "nivel_autoridad": 0.8
+      "categoria": "Doctrina Social y Política"
     },
     "ID_CELIBATO": {
       "termino_canonico": "Celibato",
       "variaciones_lexicas": ["Cura soltero", "Prohibición de casarse", "Castidad sacerdotal"],
-      "categoria": "Jerarquía y Gobierno Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_EXCOMUNION": {
       "termino_canonico": "Excomunión",
       "variaciones_lexicas": ["Expulsado de la iglesia", "Echado de la iglesia", "Desterrado"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_SUSPENSION": {
       "termino_canonico": "Suspensión",
-      "variaciones_lexicas": ["Suspendido", "Cura inhabilitado", "Sacerdote castigado", "Prohibición de dar misa", "Cura sancionado"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "variaciones_lexicas": ["Suspendido a divinis", "Suspensión a divinis", "Cura inhabilitado", "Sacerdote castigado", "Prohibición de dar misa", "Cura sancionado"],
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_APOSTASIA": {
       "termino_canonico": "Apostasía",
       "variaciones_lexicas": ["Renuncia a la iglesia", "Abandono de la fe", "Salirse de la religión", "Apostatar"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_CISMA": {
       "termino_canonico": "Cisma",
       "variaciones_lexicas": ["División de la iglesia", "Separación del Vaticano", "Rebelión contra el Papa", "Iglesia paralela"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_HEREJIA": {
       "termino_canonico": "Herejía",
       "variaciones_lexicas": ["Falsa doctrina", "Enseñanza prohibida", "Hereje", "Ir contra la fe"],
-      "categoria": "Derecho Penal Eclesiástico",
-      "nivel_autoridad": 0.8
+      "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_LAICO": {
       "termino_canonico": "Laico",
       "variaciones_lexicas": ["Seglar", "Feligrés común", "Creyente de a pie", "Católico no cura"],
-      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)",
-      "nivel_autoridad": 0.8
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_ECUMENISMO": {
       "termino_canonico": "Ecumenismo",
-      "variaciones_lexicas": ["Unión de iglesias", "Unidad de los cristianos", "Hermanos separados", "Protestantes", "Ortodoxos"],
-      "categoria": "Relaciones Internacionales y Ecumenismo",
-      "nivel_autoridad": 0.6
+      "variaciones_lexicas": ["Unión de iglesias", "Unidad de los cristianos", "Hermanos separados", "Iglesias protestantes", "Iglesia ortodoxa"],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
     },
 
     "ID_RELIGIONES_NO_CRISTIANAS": {
@@ -185,7 +170,7 @@
     },
     "ID_PENITENCIA": {
       "termino_canonico": "Sacramento de la penitencia",
-      "variaciones_lexicas": ["Confesión sacramental", "Confesarse", "Absolución", "Acto de penitencia"],
+      "variaciones_lexicas": ["Confesión sacramental", "Confesarse", "Absolución sacramental", "Acto de penitencia"],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CONFIRMACION": {

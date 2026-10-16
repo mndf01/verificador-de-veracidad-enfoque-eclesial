@@ -56,6 +56,25 @@ class ExpansionDinamicaConfig(BaseModel):
     categoria_default: str = "Normativa Externa (carga dinámica)"
 
 
+class IvrConfig(BaseModel):
+    """Pesos y parametros del IVR (Indice de Veracidad Relativa).
+
+    Los pesos se normalizan solos en la formula (ver src/vectorizacion/ivr.py):
+    solo importa su proporcion, no que sumen 1. El valor por defecto es la
+    hipotesis de partida y se calibra en el Mes 3/4 con la importancia de
+    variables del Random Forest.
+    """
+    peso_sb: float = 0.40
+    peso_literal: float = 0.25
+    peso_ontologico: float = 0.20
+    peso_autoridad: float = 0.15
+    # "contencion" = fraccion de los n-gramas de la premisa que aparecen en la
+    # norma (default) | "dice" = similitud simetrica entre ambos textos.
+    metrica_literal: str = "contencion"
+    n_gramas: int = 2
+    n_resultados: int = 5
+
+
 # TODO -> para agregar otros config files tipo .env falta adaptar esta clase para que lea.
 class Settings(BaseSettings):
     models: ModelsConfig
@@ -67,6 +86,9 @@ class Settings(BaseSettings):
 
     # expansion dinamica: PDF externo cargado por el usuario (transitorio)
     expansion_dinamica: ExpansionDinamicaConfig = ExpansionDinamicaConfig()
+
+    # capa logica: IVR (Indice de Veracidad Relativa)
+    ivr: IvrConfig = IvrConfig()
 
     model_config = SettingsConfigDict(
         toml_file=CONFIG_PATH

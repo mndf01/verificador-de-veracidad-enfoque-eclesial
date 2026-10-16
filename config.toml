@@ -37,3 +37,17 @@ palabras_min_chunk = 20
 # Nivel de autoridad por defecto: 0.33 = Nivel 1 (norma local). Valores validos: 0.33, 0.66, 1.0
 nivel_autoridad_default = 0.33
 categoria_default = "Normativa Externa (carga dinámica)"
+
+[ivr]
+# Pesos de la formula IVR = (w_sb*SB + w_lit*L + w_so*SO + w_ja*J) / (suma de pesos usados).
+# Solo importa la PROPORCION: la formula normaliza sola (y renormaliza si SO no aplica).
+peso_sb = 0.40          # SB = similitud semantica (coseno SBERT)
+peso_literal = 0.25     # L  = coincidencia literal (n-gramas de contenido)
+peso_ontologico = 0.20  # SO = coincidencia ontologica (categoria del tesauro)
+peso_autoridad = 0.15   # J  = peso de autoridad del documento (nivel_autoridad)
+# "contencion" = fraccion de los n-gramas de la premisa que aparecen en la norma (default)
+# "dice"       = similitud simetrica (penaliza normas largas)
+metrica_literal = "contencion"
+n_gramas = 2
+# Evidencias por defecto que recupera el RAG para calcular el IVR.
+n_resultados = 5

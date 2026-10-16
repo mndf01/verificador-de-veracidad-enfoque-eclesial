@@ -53,6 +53,10 @@ puede pueden debe deben tiene tienen hacer hace nada algo asi solo ya fue sido e
 sera podra podran haya hayan deba deban pueda puedan
 """.split())
 
+# Alias público de _STOP para otras capas (lo usa el IVR en src/vectorizacion/ivr.py
+# para no contar palabras vacías al medir la coincidencia literal). NO mutar.
+PALABRAS_VACIAS = _STOP
+
 # Palabras de relleno que no forman términos del dominio ("teniendo en cuenta", "primer lugar"...).
 _RELLENO = set("""
 cuenta lugar tiempo modo manera parte caso casos forma efecto fin tanto cual nuestro nuestra nuestros

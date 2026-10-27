@@ -36,7 +36,15 @@ dev = [
     "reportlab>=4",   # genera los PDF de prueba
 ]
 
+[project.scripts]
+# Comando de terminal que une todo el pipeline (web_extractor → IVR → RF).
+# Tras `pip install -e .` queda disponible como `verificador ...`.
+verificador = "src.cli:main"
+
 [tool.setuptools]
-# Solo `config` se instala como módulo top-level; el resto se ejecuta
-# desde la raíz del proyecto (imports con prefijo `src.`).
+# El proyecto se ejecuta desde la raíz con imports prefijados `src.` (módulos
+# `python -m src.*`). Además de `config` como módulo top-level, se registran los
+# paquetes `src` para que el entry point `verificador` funcione tras
+# `pip install -e .`.
+packages = ["src", "src.base_datos", "src.corp_extractor", "src.expansion_dinamica", "src.modelo", "src.procesamiento_nlp", "src.vectorizacion", "src.web_extractor", "src.cli"]
 py-modules = ['config']

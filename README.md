@@ -62,9 +62,16 @@ tesis/
 ├── config.py            # Modelos pydantic que leen config.toml + resolver_ruta()
 ├── config.toml          # TODA la configuración (rutas, modelos, modo ETL)
 ├── main.py              # Smoke test de la capa base_datos
-├── pyproject.toml       # Dependencias del proyecto
+├── verificador.py       # Entry point de consola (python -m verificador) → src.cli
+├── pyproject.toml       # Dependencias + script de consola `verificador`
 │
 ├── src/
+│   ├── orquestador.py       # Capa lógica que une todas las piezas (URL → veredicto)
+│   ├── cli/                 # Interfaz de terminal
+│   │   ├── __init__.py      # API pública (main)
+│   │   ├── cli.py           # Subcomandos: evaluar, setup, dataset-generar, entrenar
+│   │   └── __main__.py      # lanzador (python -m src.cli)
+│   │
 │   ├── base_datos/          # Capa RAG (ChromaDB + embeddings)
 │   │   ├── embeddings.py    # Función de embedding (modelo SBERT desde config)
 │   │   └── chromaDB.py      # Cliente, colección, normalizar item, indexar corpus
@@ -102,6 +109,7 @@ tesis/
 │       └── web_extractor.py  # URL/HTML → texto + metadatos, sin red en las pruebas
 │
 ├── tests/
+│   ├── test_orquestador.py            # pruebas del orquestador (con dobles, sin red/Chroma)
 │   ├── test_expansion_dinamica.py   # pruebas del módulo de expansión dinámica
 │   └── ejemplos/                    # PDF de ejemplo (1 y 2 columnas) para probarlo a mano
 │
@@ -201,9 +209,44 @@ Lee cada `*_clasificado.json` de `corpus_dir`, normaliza items a `(ids, document
 - **`url_origen` es condicional:** el Compendio no la tiene en sus items (0/583) → solo guardarla si existe, nunca `None`.
 - **Metadata solo escalares** (`str/int/float/bool`), sin `None`, sin listas/dicts anidados.
 
-### 3. Consulta a ChromaDB (próximamente)
+### 3. Interfaz unificada (Orquestador CLI)
 
-*Pendiente: capa de consulta (recuperación semántica) sobre `corpus_canonico`.*
+Todo el flujo (web → IVR → RF → veredicto) se controla desde UN comando. El CLI
+está en `src/cli/` y une las piezas desacopladas; la lógica de enlace vive en
+`src/orquestador.py` (capas separadas: el CLI solo parsea e imprime).
+
+```bash
+# Formas equivalentes de lanzarlo:
+.venv/bin/python -m src.cli --help
+.venv/bin/python -m verificador --help        # modulo raiz `verificador.py`
+verificador --help                            # tras `pip install -e .` (entry point)
+```
+
+**Subcomandos:**
+
+| Comando | Qué hace |
+|---------|----------|
+| `evaluar URL` | URL → texto/titular → premisa → IVR → RF → informe + veredicto |
+| `setup` | ETL completo + indexa el corpus en Chroma (desbloquea `data/` vacío) |
+| `dataset-generar` | Genera el CSV de entrenamiento (16 características + veredicto) |
+| `entrenar` | Entrena y persiste el Random Forest a `data/modelo_rf.joblib` |
+
+**Ejemplo (`evaluar`, modo interactivo):**
+
+```bash
+.venv/bin/python -m src.cli evaluar "https://www.vatican.va/content/..."
+```
+
+Propondrá el titular como premisa y te pedirá confirmación antes de evaluar.
+Para automatización (sin preguntar por pantalla):
+
+```bash
+.venv/bin/python -m src.cli evaluar "https://..." --no-interactivo \
+    --premisa "El bautismo esta prohibido"
+```
+
+**Estado:** `setup` y `dataset-generar` requieren el corpus indexado (esta rama
+implementa el CLI y su lógica; la ejecución ETL en red se confirma antes de lanzar).
 
 ### 4. Web / noticias → veredicto
 
@@ -455,3 +498,4 @@ python -m src.procesamiento_nlp.tesauro_tools candidatos --top 40 --salida candi
 | IVR (heurísticas semánticas + tesauro) | ✅ `vector_caracteristicas()` para el RF |
 | Random Forest + veredicto | ⏳ `src/modelo/rf.py` creado · falta dataset etiquetado |
 | Expansión dinámica (PDF externo, transitorio) | ✅ módulo + pruebas · ⏳ conectar con la interfaz y con el IVR |
+| Orquestador CLI (unifica todo el pipeline) | ⏳ `src/orquestador.py` + `src/cli/` creados · requiere corpus indexado para `evaluar` real |

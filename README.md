@@ -91,8 +91,15 @@ tesis/
 │   │   ├── tesauro_tools.py # Valida el tesauro y busca candidatos en el corpus (solo lectura)
 │   │   └── tesauro.json     # Tesauro de categorías (insumo del IVR)
 │   │
-│   └── web_extractor/       # Extracción de contenido de noticias (pendiente)
-│       └── web_extractor.py # Boceto con trafilatura
+│   ├── vectorizacion/
+│   │   └── ivr.py            # IVR: puntúa evidencias + vector_caracteristicas()
+│   │
+│   ├── modelo/
+│   │   └── rf.py             # Random Forest: entrena / predice el veredicto (capa de decisión)
+│   │
+│   └── web_extractor/       # Extracción de contenido de noticias (trafilatura)
+│       ├── __init__.py       # API pública (extraer_contenido_url, extraer_titular, ...)
+│       └── web_extractor.py  # URL/HTML → texto + metadatos, sin red en las pruebas
 │
 ├── tests/
 │   ├── test_expansion_dinamica.py   # pruebas del módulo de expansión dinámica
@@ -198,9 +205,10 @@ Lee cada `*_clasificado.json` de `corpus_dir`, normaliza items a `(ids, document
 
 *Pendiente: capa de consulta (recuperación semántica) sobre `corpus_canonico`.*
 
-### 4. Web / noticias → veredicto (próximamente)
+### 4. Web / noticias → veredicto
 
-*Pendiente: `web_extractor` (trafilatura) + heurísticas IVR + Random Forest.*
+*`web_extractor` ya está terminado y testeado. Falta el orquestador CLI que lo conecte
+con el IVR + Random Forest (ver apartado CLI propuesto).*
 
 ### 5. Expansión dinámica (PDF externo, transitorio)
 
@@ -316,7 +324,102 @@ python -c "from config import obtener_configuraciones as o; print(o().expansion_
 - `CERTIFICATE_VERIFY_FAILED` al cargar el modelo: lo causa un proxy o antivirus que intercepta la conexión. No es grave si el modelo ya está en la caché local; el programa sigue con él.
 - La primera ejecución descarga el modelo SBERT (~470 MB).
 
-### 6. Tesauro: validar y buscar candidatos
+### 6. Extracción de contenido web (noticias/artículos)
+
+El módulo `src/web_extractor/` extrae el texto de una noticia a partir de su URL, usando
+trafilatura. Es el eslabon que convierte una **URL** en la **premisa** que evaluara el IVR
+(la fuente de la noticia para contrastar contra el corpus canonico).
+
+Flujo:  `URL ──► web_extractor ──► premisa ──► IVR ──► RF ──► veredicto`
+
+#### Probar la extraccion con una URL real
+
+```bash
+# Extrae el texto principal de la noticia
+.venv/bin/python -m src.web_extractor "https://es.wikipedia.org/wiki/Bautismo"
+
+# Solo el titular (premisa candidata para el IVR)
+.venv/bin/python -m src.web_extractor "https://..." --titulo
+
+# Texto + metadatos (titulo, autor, fecha, idioma)
+.venv/bin/python -m src.web_extractor "https://..." --metadata
+```
+
+#### API publica
+
+| Funcion | Que devuelve |
+|---|---|
+| `extraer_contenido_url(url)` | Texto principal de la noticia (str) o `None`. |
+| `extraer_contenido_html(html)` | Igual, pero a partir de HTML ya descargado (estrategico para testear sin red). |
+| `extraer_metadata_url(url)` | `{titulo, autor, fecha, idioma}` (vacios = `""`, nunca `None`). |
+| `extraer_metadata_html(html)` | Igual, desde HTML (sin red). |
+| `extraer_titular(url)` | Titular de la noticia (premisa candidata) o `None`. |
+
+```python
+from src.web_extractor import extraer_contenido_url, extraer_titular
+
+texto = extraer_contenido_url("https://...")
+titulo = extraer_titular("https://...")
+```
+
+#### Uso y limites (`trafilatura`)
+
+- **No hace OCR ni ejecuta JavaScript**: su alcance son paginas HTML con contenido
+  accesible (articulos/noticias). Una pagina que requiere JS para renderizar no dara texto.
+- Nunca lanza: ante URL invalida, error de red o pagina sin articulo devuelve `None` y lo
+  registra en el log, para que el orquestador decida como mostrarlo.
+- Para que el IVR funcione bien la premisa debe ser corta (una afirmacion). El plano que
+  presenta la interfaz es: extraer → mostrar el **titular** → que el usuario confirme/edite
+  la premisa de una linea antes de evaluar.
+
+### 7. Random Forest (capa de decisión)
+
+
+El módulo `src/modelo/rf.py` clasifica el **veredicto final** consumiendo el vector de
+características que produce el IVR (`ivr.vector_caracteristicas()`) — un vector plano de
+16 floats. El RF **no toca Chroma ni los textos**: está desacoplado igual que el IVR.
+
+Flujo:
+
+```
+premisa ──► ivr.calcular_ivr() ──► informe ──► vector_caracteristicas() ──► RF ──► veredicto
+```
+
+Entrenar (una vez, tras tener un dataset etiquetado). El CSV debe tener las 16 columnas
+del vector del IVR + la columna categórica `veredicto`:
+
+```bash
+python -m src.modelo.rf --entrenar data/etiquetado.csv --salida data/modelo_rf.joblib
+```
+
+Predecir (ya con el modelo guardado):
+
+```bash
+python -m src.modelo.rf --predecir "El bautismo esta prohibido"
+```
+
+Integración en Python:
+
+```python
+from src.vectorizacion import ivr
+from src.modelo import rf      # módulo dentro de src/modelo/rf.py
+
+informe = ivr.calcular_ivr(premisa)
+modelo  = rf.cargar("data/modelo_rf.joblib")
+resultado = rf.predecir(modelo["clf"], modelo["le"], rf._X_de_informe(informe))
+# resultado = {"clase": "inconsistente", "probabilidad": 0.87, "probabilidades": {...}}
+```
+
+**Dos roles del RF en la tesis** (ver `config.IvrConfig` y el docstring de `ivr.py`):
+1. **Calibrar los pesos del IVR** con la importancia de las variables del bosque
+   (`.feature_importances_`); los pesos viven en `config.toml → [ivr]`.
+2. **Clasificar el veredicto** según el vector del IVR y la confianza del modelo (`predict_proba`).
+
+> La columna `so_disponible` permite al RF distinguir *no aplica* de *0 real* en la señal
+> ontológica, algo que un promediado ingenuo no puede. Mantener el orden de
+> `NOMBRES_CARACTERISTICAS` en sincronía con las claves de `vector_caracteristicas()`.
+
+### 8. Tesauro: validar y buscar candidatos
 
 Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (nunca lo modifica; el tesauro se sigue editando a mano):
 
@@ -348,7 +451,7 @@ python -m src.procesamiento_nlp.tesauro_tools candidatos --top 40 --salida candi
 | Scrapers + ETL → raw → clasificado | ✅ |
 | Capa ChromaDB (cliente, colección, indexar) | ✅ en desarrollo |
 | Consulta semántica (RAG) | ⏳ |
-| Extracción de noticias (web_extractor) | ⏳ |
-| IVR (heurísticas semánticas + tesauro) | ⏳ |
-| Random Forest + veredicto | ⏳ |
+| Extracción de noticias (web_extractor) | ✅ módulo terminado + pruebas, sin red |
+| IVR (heurísticas semánticas + tesauro) | ✅ `vector_caracteristicas()` para el RF |
+| Random Forest + veredicto | ⏳ `src/modelo/rf.py` creado · falta dataset etiquetado |
 | Expansión dinámica (PDF externo, transitorio) | ✅ módulo + pruebas · ⏳ conectar con la interfaz y con el IVR |

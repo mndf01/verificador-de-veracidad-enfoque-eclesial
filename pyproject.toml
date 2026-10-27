@@ -26,6 +26,7 @@ dependencies = [
     # IVR / modelo (Random Forest) — usadas por el módulo de decisión
     "pandas>=2.2",
     "scikit-learn>=1.4",
+    "joblib>=1.4",   # guardar/cargar el modelo RF entrenado (src/modelo/rf.py)
 ]
 
 [project.optional-dependencies]

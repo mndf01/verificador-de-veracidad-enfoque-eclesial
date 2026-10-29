@@ -18,7 +18,7 @@ max_results = 30
 
 [corp_extractor]
 # Modo de ejecucion de los extractores: # Usar "dinamico" para forzar la descarga web desde vatican.va, o "estatico" desde local si existen documentos
-modo_ejecucion = "estatico"
+modo_ejecucion = "dinamico"
 
 [expansion_dinamica]
 # Carga transitoria de UN PDF normativo externo durante la sesion (no se mezcla con corpus_canonico).

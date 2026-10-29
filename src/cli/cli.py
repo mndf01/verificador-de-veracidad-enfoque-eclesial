@@ -49,9 +49,17 @@ def construir_parser() -> argparse.ArgumentParser:
 
     # ---- dataset-generar ----
     p_ds = sub.add_parser("dataset-generar", help="Genera un CSV de entrenamiento para el RF.")
+    p_ds.add_argument("--db", required=True,
+                      help="Ruta a iglesia.db (SQLite con tabla urls).")
     p_ds.add_argument("--salida", default="data/etiquetado.csv", help="CSV de salida.")
-    p_ds.add_argument("--premisas", help="Archivo de texto (una premisa por línea) con verdades/mentiras.")
-    p_ds.add_argument("--fuente-pdf", help="PDF a usar como fuente de los ejemplos (bajo desarrollo).")
+    p_ds.add_argument("--n", type=int, default=30, help="Tamaño de la muestra (0 = todas).")
+    p_ds.add_argument("--estrategia", choices=["proxy", "umbral", "debil"], default="debil",
+                      help="Como asignar el veredicto: proxy=categoria del medio, "
+                           "umbral=por IVR, debil=categoria prior + IVR.")
+    p_ds.add_argument("--ventana", type=int, default=175, help="Palabras por ventana.")
+    p_ds.add_argument("--solape", type=int, default=50, help="Palabras de solape entre ventanas.")
+    p_ds.add_argument("--solo-diagnostico", action="store_true",
+                      help="No escribe CSV; solo imprime el diagnostico de la muestra.")
     p_ds.set_defaults(func=_cmd_dataset)
 
     # ---- entrenar ----
@@ -205,25 +213,124 @@ def _cmd_setup(args: argparse.Namespace) -> int:
 
 
 def _ejecutar_etl() -> int:
-    """Corre el pipeline ETL como subproceso y devuelve su código de salida."""
+    """Corre el pipeline ETL como subproceso y devuelve su código de salida.
+
+    `main_etl.py` usa imports relativos al paquete (`from extractores...`), así que
+    debe ejecutarse COMO SCRIPT con su carpeta en sys.path. Se lanza con `-c`
+    inyectando `src/corp_extractor` en el path, equivalente a
+    `cd src/corp_extractor && python main_etl.py`, pero sin cambiar de cwd para que
+    las rutas de config.toml se resuelvan contra la raíz del proyecto.
+    """
     import subprocess
-    python = sys.executable
-    proc = subprocess.run(
-        [python, "-m", "src.corp_extractor.main_etl"],
-        cwd=str(_PROYECTO_RAIZ),
+    script = _PROYECTO_RAIZ / "src" / "corp_extractor" / "main_etl.py"
+    codigo = (
+        "import sys, runpy; "
+        f"sys.path.insert(0, r'{script.parent}'); "
+        f"runpy.run_path(r'{script}', run_name='__main__')"
     )
+    proc = subprocess.run([sys.executable, "-c", codigo], cwd=str(_PROYECTO_RAIZ))
     return proc.returncode
 
 
 def _cmd_dataset(args: argparse.Namespace) -> int:
-    # Fase 2: genera el CSV a partir de un conjunto de premisas etiquetadas.
-    if args.premisas:
-        print(f"\nℹ dataset-generar requiere la colección indexada y una fuente de premisas etiquetadas.")
-        print(f"   Recibido: premisas={args.premisas}  salida={args.salida}")
-    else:
-        print("Dataset de entrenamiento aún no disponible (requiere colección indexada "
-              "y premisas etiquetadas). Se implementará en la fase 2.")
-    return 1
+    """Genera el CSV de entrenamiento: URLs → ventanas → IVR → features + veredicto.
+
+    Ejecuta la muestra (o todas si --n 0) por el pipeline del IVR con ventana
+    deslizante y guarda un CSV con las 16 características + columna `veredicto`.
+    Con --solo-diagnostico imprime el análisis sin escribir el CSV.
+    """
+    from collections import Counter
+
+    from src.dataset import leer_urls, muestra_balanceada, procesar_noticia
+    from src.dataset.agregacion import agregar_features, asignar_veredicto
+
+    try:
+        urls = leer_urls(args.db)
+    except FileNotFoundError as e:
+        print(f"✖ {e}", file=sys.stderr)
+        return 1
+
+    if not urls:
+        print("✖ La base de URLs está vacía.", file=sys.stderr)
+        return 1
+
+    seleccion = muestra_balanceada(urls, args.n) if args.n and args.n > 0 else urls
+    print(f"\n=== DATASET: {len(seleccion)} noticias "
+          f"de {len(urls)} en la base ===")
+    print(f"distribución: {dict(Counter(u.categoria for u in seleccion))}")
+    print(f"ventana: {args.ventana} palabras, solape {args.solape}")
+    print(f"estrategia de etiquetado: {args.estrategia}\n")
+
+    procesadas = []
+    fallidas = []
+    for i, item in enumerate(seleccion, 1):
+        print(f"[{i}/{len(seleccion)}] {item.categoria:<7} {item.url[:66]}", end="  ", flush=True)
+        res = procesar_noticia(item, tam_ventana=args.ventana, solape=args.solape)
+        if not res.ok:
+            fallidas.append((item.url, res.motivo))
+            print(f"✖ {res.motivo}")
+            continue
+        procesadas.append(res)
+        print(f"✓ {res.n_ventanas} ventanas | ivr_max={res.ivr_max:.3f} "
+              f"| con señal={res.n_ventanas_con_senal}")
+
+    print(f"\n--- Resumen de la muestra ---")
+    print(f"procesadas OK   : {len(procesadas)}")
+    print(f"fallidas        : {len(fallidas)}")
+
+    if procesadas:
+        con_senal = sum(1 for r in procesadas if r.n_ventanas_con_senal > 0)
+        print(f"con alguna ventana con señal (ivr>=0.15): {con_senal}/{len(procesadas)}")
+        print("\npor categoría:")
+        for cat in sorted({r.categoria for r in procesadas}):
+            grupo = [r for r in procesadas if r.categoria == cat]
+            if not grupo:
+                continue
+            media_max = sum(r.ivr_max for r in grupo) / len(grupo)
+            print(f"  {cat:<8} n={len(grupo):<3} ivr_max medio={media_max:.3f}")
+
+    if fallidas:
+        print("\nfallidas (motivo):")
+        for url, motivo in fallidas[:10]:
+            print(f"  · {motivo:<32} {url[:60]}")
+
+    if args.solo_diagnostico:
+        print("\n(--solo-diagnostico: no se escribió CSV)")
+        return 0
+
+    if not procesadas:
+        print("\n✖ Ninguna noticia se procesó; no se puede escribir el CSV.", file=sys.stderr)
+        return 1
+
+    filas = []
+    for res in procesadas:
+        features = agregar_features(res)
+        veredicto = asignar_veredicto(res, args.estrategia)
+        filas.append({**features, "categoria_medio": res.categoria, "veredicto": veredicto})
+
+    _escribir_csv(args.salida, filas)
+    print(f"\n✓ CSV escrito: {args.salida} ({len(filas)} filas)")
+    print(f"distribución de veredictos: {dict(Counter(f['veredicto'] for f in filas))}")
+    return 0
+
+
+def _escribir_csv(ruta: str, filas: list[dict]) -> None:
+    """Escribe el CSV con las columnas de features primero y las etiquetas al final."""
+    import csv
+    from pathlib import Path as _Path
+
+    from src.modelo.rf import NOMBRES_CARACTERISTICAS
+
+    columnas = list(NOMBRES_CARACTERISTICAS) + ["categoria_medio", "veredicto"]
+    destino = _Path(ruta)
+    if not destino.is_absolute():
+        destino = _PROYECTO_RAIZ / destino
+    destino.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(destino, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=columnas, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(filas)
 
 
 def _cmd_entrenar(args: argparse.Namespace) -> int:

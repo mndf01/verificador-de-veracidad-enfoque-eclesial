@@ -5,12 +5,18 @@ import re
 # =====================================================================
 # 1. EL MAPA DE REGLAS (MOTOR DE CLASIFICACIÓN)
 # =====================================================================
+# Escala graduada de autoridad canónica (J):
+#   - 1.00 : Código de Derecho Canónico (legislación universal vigente)
+#   - 0.85 : Constituciones del Concilio Vaticano II (marco doctrinal supremo)
+#   - 0.70 : Decretos y Declaraciones del Concilio Vaticano II
+#   - 0.55 : Compendio de la Doctrina Social de la Iglesia (síntesis magisterial)
+#   - 0.33 : Normativa Externa / Particular (carga dinámica por sesión)
 
 REGLAS_ETL = {
     "COMPENDIO": {
         "condicion_fuente": "Compendio de la Doctrina Social",
         "categoria_default": "Doctrina Social y Política",
-        "autoridad_default": 0.66
+        "autoridad_default": 0.55
     },
     "CANONICO": {
         "condicion_fuente": "Código de Derecho Canónico",
@@ -26,19 +32,30 @@ REGLAS_ETL = {
         }
     },
     "VATICANO_II": {
-        "condicion_fuente": "Concilio Vaticano II", 
+        "condicion_fuente": "Concilio Vaticano II",
         "mapeo_documentos": {
-            "Lumen gentium": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 1.0},
-            "Dei Verbum": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 1.0},
-            "Sacrosanctum concilium": {"categoria": "Sacramentos y Liturgia", "autoridad": 1.0},
-            "Gaudium et spes": {"categoria": "Doctrina Social y Política", "autoridad": 0.66},
-            "Unitatis redintegratio": {"categoria": "Relaciones Internacionales y Ecumenismo", "autoridad": 0.66},
-            "Nostra aetate": {"categoria": "Relaciones Internacionales y Ecumenismo", "autoridad": 0.66},
-            "Dignitatis humanae": {"categoria": "Doctrina Social y Política", "autoridad": 0.66},
-            "Ad gentes": {"categoria": "Doctrina Social y Política", "autoridad": 0.66}
+            # Constituciones (0.85)
+            "Lumen gentium": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.85},
+            "Dei Verbum": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.85},
+            "Sacrosanctum concilium": {"categoria": "Sacramentos y Liturgia", "autoridad": 0.85},
+            "Gaudium et spes": {"categoria": "Doctrina Social y Política", "autoridad": 0.85},
+            # Decretos (0.70)
+            "Christus Dominus": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.70},
+            "Presbyterorum Ordinis": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.70},
+            "Optatam Totius": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.70},
+            "Perfectae Caritatis": {"categoria": "Jerarquía y Gobierno Eclesiástico", "autoridad": 0.70},
+            "Apostolicam Actuositatem": {"categoria": "Derechos y Obligaciones de los Fieles (Laicado)", "autoridad": 0.70},
+            "Orientalium Ecclesiarum": {"categoria": "Relaciones Internacionales y Ecumenismo", "autoridad": 0.70},
+            "Unitatis redintegratio": {"categoria": "Relaciones Internacionales y Ecumenismo", "autoridad": 0.70},
+            "Ad gentes": {"categoria": "Doctrina Social y Política", "autoridad": 0.70},
+            "Inter Mirifica": {"categoria": "Doctrina Social y Política", "autoridad": 0.70},
+            # Declaraciones (0.70)
+            "Dignitatis humanae": {"categoria": "Doctrina Social y Política", "autoridad": 0.70},
+            "Nostra aetate": {"categoria": "Relaciones Internacionales y Ecumenismo", "autoridad": 0.70},
+            "Gravissimum Educationis": {"categoria": "Doctrina Social y Política", "autoridad": 0.70}
         },
         "categoria_default": "Derechos y Obligaciones de los Fieles (Laicado)",
-        "autoridad_default": 0.66
+        "autoridad_default": 0.70
     }
 }
 
@@ -105,6 +122,8 @@ def clasificar_archivo(archivo_entrada, archivo_salida):
 # 3. EJECUCIÓN DEL SCRIPT
 # =====================================================================
 if __name__ == '__main__':
+    import sys
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
     from config import obtener_configuraciones, resolver_ruta
     settings = obtener_configuraciones()
     directorio_datos_in = resolver_ruta(settings.paths.raw_corpus_dir)
@@ -114,8 +133,8 @@ if __name__ == '__main__':
     archivos_a_procesar = [
         ("corpus_compendio_v1.json", "corpus_compendio_clasificado.json"),
         ("corpus_derecho_canonico_v1.json", "corpus_derecho_canonico_clasificado.json"),
-        ("corpus_constituciones_v1.json", "corpus_constituciones_clasificada.json"),
-        ("corpus_declaraciones_v1.json", "corpus_declaraciones_clasificada.json"),
+        ("corpus_constituciones_v1.json", "corpus_constituciones_clasificado.json"),
+        ("corpus_declaraciones_v1.json", "corpus_declaraciones_clasificado.json"),
         ("corpus_decretos_v1.json", "corpus_decretos_clasificado.json")
     ]
     

@@ -175,6 +175,39 @@ class TestEvaluarNoticia(unittest.TestCase):
         self.assertFalse(res.ok)
         self.assertTrue(any("predecir" in e.lower() for e in res.errores))
 
+    def test_flujo_con_pdf_expansion_dinamica(self):
+        """Cuando se pasa ruta_pdf, se carga el PDF y se inyecta consultar_combinado al IVR."""
+        cargados = []
+        usados = []
+
+        def fake_cargar_pdf(ruta):
+            cargados.append(str(ruta))
+            return {"nombre": "Decreto 12/2024", "fragmentos": 9}
+
+        def fake_consultar_combinado(premisa, n):
+            return [_EVIDENCIA]
+
+        def fake_ivr_con_fn(premisa, n_resultados=5, consultar_fn=None):
+            usados.append(consultar_fn)
+            return _informe_fake(premisa)
+
+        res = orquestador.evaluar_noticia(
+            url="https://ejemplo.com/noticia",
+            premisa="El bautismo es necesario",
+            ruta_pdf="decreto.pdf",
+            extraer_contenido=lambda url: "texto",
+            calcular_ivr=fake_ivr_con_fn,
+            cargar_pdf_dinamico=fake_cargar_pdf,
+            consultar_combinado=fake_consultar_combinado,
+            vector_caracteristicas=_vector_real,
+            cargar_modelo=lambda _ruta: _modelo_fake(),
+            predecir=_pred_fake,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(len(cargados), 1)
+        self.assertEqual(usados, [fake_consultar_combinado])
+        self.assertIn("expansion_dinamica", res.informe_ivr)
+
 
 class TestVeredictoParaInterfaz(unittest.TestCase):
     def test_mapeo_español(self):
@@ -193,6 +226,9 @@ class TestVeredictoParaInterfaz(unittest.TestCase):
 class TestNivelLabel(unittest.TestCase):
     def test_etiquetas(self):
         self.assertIn("universal", orquestador._nivel_label(1.0).lower())
+        self.assertIn("constitución", orquestador._nivel_label(0.85).lower())
+        self.assertIn("decreto", orquestador._nivel_label(0.70).lower())
+        self.assertIn("compendio", orquestador._nivel_label(0.55).lower())
         self.assertIn("local", orquestador._nivel_label(0.33).lower())
         self.assertIn("Nivel 0.5", orquestador._nivel_label(0.5))
 

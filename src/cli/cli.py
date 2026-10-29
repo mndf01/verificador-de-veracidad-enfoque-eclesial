@@ -22,6 +22,12 @@ _PROYECTO_RAIZ = Path(__file__).resolve().parents[2]
 if _PROYECTO_RAIZ not in sys.path:
     sys.path.insert(0, str(_PROYECTO_RAIZ))
 
+# Asegurar soporte de caracteres UTF-8 en consolas Windows (cp1252)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 def construir_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
@@ -76,7 +82,7 @@ def construir_parser() -> argparse.ArgumentParser:
 # ----------------------------------------------------------------------------------------
 
 def _cmd_evaluar(args: argparse.Namespace) -> int:
-    from src.orquestador import ResultadoEvaluacion, evaluar_noticia, veredicto_para_interfaz
+    from src.orquestador import ResultadoEvaluacion, evaluar_noticia
 
     # 0. Resolución de la premisa en modo interactivo: proponemos el titular y
     #    dejamos que el usuario lo confirme o lo reescriba. En modo no-interactivo,
@@ -112,6 +118,8 @@ def _cmd_evaluar(args: argparse.Namespace) -> int:
     )
 
     if not resultado.ok:
+        if resultado.informe_ivr and resultado.informe_ivr.get("ok"):
+            _mostrar_informe(resultado)
         print("\n✖ No se pudo completar la evaluación.")
         for err in resultado.errores or ["motivo desconocido"]:
             print(f"  • {err}")
@@ -132,6 +140,12 @@ def _mostrar_informe(resultado) -> None:
 
     print(f"\nURL      : {resultado.url}")
     print(f"Premisa  : {resultado.premisa}")
+    exp = informe.get("expansion_dinamica")
+    if exp and exp.get("resumen") is not None:
+        r_pdf = exp["resumen"]
+        nombre = getattr(r_pdf, "nombre", exp.get("ruta_pdf"))
+        frags = getattr(r_pdf, "fragmentos", "?")
+        print(f"PDF extra: {nombre} ({frags} fragmentos en expansión dinámica)")
 
     # Veredicto en grande
     print(f"\n{'─' * 62}")
@@ -155,8 +169,9 @@ def _mostrar_informe(resultado) -> None:
             sen = ev.get("senales", {})
             so = "n/a" if sen.get("ontologico") is None else f"{sen['ontologico']:.3f}"
             nivel = _nivel_label(ev.get("nivel_autoridad"))
+            origen = f" [{ev['origen']}]" if "origen" in ev else ""
             print(f"\n  {i}. IVR={ev.get('ivr', 0.0):.3f} | SB={sen.get('sb', 0.0):.3f} "
-                  f"| L={sen.get('literal', 0.0):.3f} | SO={so} | J={sen.get('autoridad', 0.0):.3f}")
+                  f"| L={sen.get('literal', 0.0):.3f} | SO={so} | J={sen.get('autoridad', 0.0):.3f}{origen}")
             print(f"     Cita : {ev.get('cita', 'sin cita')}")
             print(f"     Nivel: {nivel}")
             texto = (ev.get("texto") or "")[:220]

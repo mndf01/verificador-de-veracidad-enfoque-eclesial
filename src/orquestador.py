@@ -13,7 +13,7 @@ fina de parseo de argumentos sobre estas funciones.
 Toda función acepta inyectar sus dependencias reales (por ejemplo, inyectar una
 función `extraer` falsa o un `calcular_ivr` falso) para poder testear el flujo
 inclusive sin red y sin Chroma. Esto repite el patrón de dobles que ya usa el
-resto del proyecto (`ColeccionFalsa`, `ClienteFalso`, `fetch_url`).
+resto del proyecto (`ColeccionFalso`, `ClienteFalso`, `fetch_url`).
 """
 from __future__ import annotations
 
@@ -25,7 +25,14 @@ from typing import Callable
 log = logging.getLogger(__name__)
 
 # Asignaciones de nivel_autoridad numérico → etiqueta legible (para la presentación).
-NIVEL_AUTORIDAD_LABEL = {0.33: "Nivel 1 (local)", 0.66: "Nivel 2 (nacional)", 1.0: "Nivel 3 (universal)"}
+NIVEL_AUTORIDAD_LABEL = {
+    0.33: "Nivel 1 (local / expansión dinámica)",
+    0.55: "Nivel 2 — Compendio DSI (magisterial)",
+    0.66: "Nivel 2 (nacional)",
+    0.70: "Nivel 2 — Decreto / Declaración (Vaticano II)",
+    0.85: "Nivel 3 — Constitución (Vaticano II)",
+    1.0: "Nivel 3 (universal — Código de Derecho Canónico)",
+}
 
 # Veredictos posibles del Random Forest (coinciden con rf.CLASES_VEREDICTO).
 VEREDICTOS = ("consistente", "inconsistente", "no_verificable")
@@ -72,6 +79,22 @@ def _mensaje_veredicto(clase: str) -> str:
     return _SENTENCIA.get(clase, "Veredicto desconocido.")
 
 
+def _invocar_ivr(calcular_ivr_fn: Callable, premisa: str, n_resultados: int, consultar_fn=None) -> dict | None:
+    """Invoca `calcular_ivr` con soporte opcional para `consultar_fn` y `n_resultados`.
+
+    Si en pruebas se inyectó un doble con firma `f(premisa)`, cae con gracia a un
+    solo argumento posicional.
+    """
+    if not isinstance(premisa, str):
+        return None
+    if consultar_fn is not None:
+        try:
+            return calcular_ivr_fn(premisa, n_resultados=n_resultados, consultar_fn=consultar_fn)
+        except TypeError:
+            return calcular_ivr_fn(premisa)
+    return calcular_ivr_fn(premisa)
+
+
 # ----------------------------------------------------------------------------------------
 # Núcleo del flujo
 # ----------------------------------------------------------------------------------------
@@ -83,7 +106,7 @@ def evaluar_noticia(
     *,
     extraer_contenido: Callable[[str], str | None] | None = None,
     extraer_titular: Callable[[str], str | None] | None = None,
-    calcular_ivr: Callable[[str], dict] | None = None,
+    calcular_ivr: Callable[..., dict] | None = None,
     cargar_modelo: Callable[[str | Path], dict] | None = None,
     predecir: Callable[[object, object, list[float]], dict] | None = None,
     vector_caracteristicas: Callable[[dict], dict] | None = None,
@@ -133,28 +156,46 @@ def evaluar_noticia(
         premisa = titular
         resultado.premisa = premisa
 
-    # 2. Calcular el IVR sobre la premisa (recupera evidencias del corpus base).
+    # 2. Calcular el IVR sobre la premisa (corpus base o combinado con expansión dinámica).
     if calcular_ivr is None:
         from src.vectorizacion.ivr import calcular_ivr as calcular_ivr
-    informe = calcular_ivr(premisa) if isinstance(premisa, str) else None
+
+    resumen_pdf = None
+    if ruta_pdf is not None:
+        ruta_pdf_obj = Path(ruta_pdf)
+        if cargar_pdf_dinamico is not None or consultar_combinado is not None:
+            try:
+                if cargar_pdf_dinamico is not None:
+                    resumen_pdf = cargar_pdf_dinamico(ruta_pdf_obj)
+                informe = _invocar_ivr(calcular_ivr, premisa, n_resultados, consultar_combinado)
+            except Exception as e:
+                resultado.errores.append(f"Error en expansión dinámica del PDF ({type(e).__name__}: {e}).")
+                return resultado
+        else:
+            from src.expansion_dinamica import ExpansionError, SesionExpansion
+            try:
+                with SesionExpansion() as sesion:
+                    resumen_pdf = sesion.cargar_pdf(ruta_pdf_obj)
+                    informe = _invocar_ivr(calcular_ivr, premisa, n_resultados, sesion.consultar_combinado)
+            except ExpansionError as e:
+                resultado.errores.append(f"Error en expansión dinámica del PDF ({e}).")
+                return resultado
+    else:
+        informe = _invocar_ivr(calcular_ivr, premisa, n_resultados, None)
+
     if not informe or not informe.get("ok"):
         motivo = (informe or {}).get("motivo", "informe inválido")
         resultado.errores.append(f"El IVR no encontró evidencias para evaluar la premisa ({motivo}).")
         resultado.informe_ivr = informe or {}
         return resultado
 
-    # 2b. Expansión dinámica con PDF (pendiente de integración total).
-    #     Actualmente dejamos constancia de que se solicitó un PDF, pero el IVR
-    #     se calcula sobre el corpus base. La integración real del PDF en el IVR
-    #     (mediante consultar_combinado + recalcular) se abordará en una fase
-    #     posterior; el CLI ya expone el hook `--pdf` para no romper la firma.
-    if ruta_pdf is not None:
-        from pathlib import Path as _P
-        resultado.informe_ivr["pdf_pendiente"] = str(_P(ruta_pdf))
-        log.info("PDF pendiente de combinar en el IVR (fase posterior): %s", ruta_pdf)
-
     resultado.informe_ivr = dict(informe)
     resultado.informe_ivr["premisa"] = premisa
+    if ruta_pdf is not None:
+        resultado.informe_ivr["expansion_dinamica"] = {
+            "ruta_pdf": str(Path(ruta_pdf)),
+            "resumen": resumen_pdf,
+        }
 
     # 3. Vector de características para el Random Forest.
     if vector_caracteristicas is None:

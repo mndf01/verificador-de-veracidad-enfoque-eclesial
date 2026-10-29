@@ -7,7 +7,7 @@ todas normalizadas a [0, 1]:
     SB = similitud semántica     -> coseno SBERT que ya devuelve `consultar()`
     L  = coincidencia literal    -> n-gramas de contenido compartidos
     SO = coincidencia ontológica -> categoría del tesauro compartida
-    J  = peso de autoridad       -> nivel_autoridad del chunk (0.33 / 0.66 / 1.0)
+    J  = peso de autoridad       -> nivel_autoridad del chunk (0.33 .. 1.0)
 
     IVR = (w_SB·SB + w_L·L + w_SO·SO + w_J·J) / (w_SB + w_L + w_SO + w_J)
 
@@ -22,17 +22,22 @@ características que consumirá el Random Forest de `src/modelo/` (Mes 3): ver
 `vector_caracteristicas()`.
 
 Este módulo NO toca ChromaDB directamente (no abre colecciones ni carga
-SBERT): consume el contrato de `src.base_datos.chromaDB.consultar()`.
+SBERT): consume el contrato de `src.base_datos.chromaDB.consultar()` (o de
+`SesionExpansion.consultar_combinado()` cuando se activa la expansión dinámica).
 
 Uso:
     .venv/bin/python -m src.vectorizacion.ivr "El bautismo esta prohibido"
 """
 from __future__ import annotations
 
+import math
 import re
 import sys
 from functools import lru_cache
 from pathlib import Path
+from typing import Callable
+
+import snowballstemmer
 
 # Permite ejecutarlo como módulo (-m src.vectorizacion.ivr) o como script suelto.
 if __package__ in (None, ""):
@@ -56,6 +61,26 @@ METRICAS_LITERALES = ("contencion", "dice")
 
 _TOKENS = re.compile(r"[a-z0-9]+")
 
+_STEMMER = snowballstemmer.stemmer("spanish")
+
+
+def _stem_palabra(palabra: str) -> str:
+    """Raíz morfológica en español usando Snowball Stemmer."""
+    p = palabra.lower()
+    if p == "papado":
+        return "papado"
+    return _STEMMER.stemWord(p)
+
+
+def _stem_tokens(tokens: list[str]) -> list[str]:
+    """Aplica stemming a una lista de tokens."""
+    return [_stem_palabra(t) for t in tokens]
+
+
+def _stem_frase(texto: str) -> str:
+    """Normaliza un texto y convierte cada palabra a su raíz morfológica (stem)."""
+    return " ".join(_stem_tokens(_TOKENS.findall(normalizar(texto))))
+
 
 # ----------------------------------------------------------------------------------------
 # Índice del tesauro (ontología) — señal SO
@@ -63,13 +88,14 @@ _TOKENS = re.compile(r"[a-z0-9]+")
 
 @lru_cache(maxsize=4)
 def _indice_tesauro(ruta: Path = RUTA_TESAURO_ABSOLUTA) -> tuple[dict[str, str], dict[str, str]]:
-    """Aplana el tesauro en (forma normalizada -> id_concepto, id_concepto -> categoría).
+    """Aplana el tesauro en (forma con stemming -> id_concepto, id_concepto -> categoría).
 
-    Cada concepto aporta su `termino_canonico` y todas sus `variaciones_lexicas`.
-    El validador del tesauro garantiza que una forma no pertenezca a dos
-    conceptos; si igual ocurriera, gana la primera (`setdefault`).
+    Aplica el mismo stemmer que la señal literal (Opción 2A de auditoría) para
+    detectar plurales, conjugaciones verbales y variaciones de género sin tocar
+    el JSON. Se ordena de frases más largas a más cortas para dar prioridad a
+    términos específicos (ej. 'obispo de roma' antes que 'obispo').
 
-    :return: (forma_a_concepto, categoria_de). NO mutar: están cacheados.
+    :return: (forma_stem_a_concepto, categoria_de). NO mutar: están cacheados.
     """
     conceptos = cargar_tesauro(ruta).get("conceptos", {})
     forma_a_concepto: dict[str, str] = {}
@@ -79,51 +105,92 @@ def _indice_tesauro(ruta: Path = RUTA_TESAURO_ABSOLUTA) -> tuple[dict[str, str],
         categoria_de[id_concepto] = concepto.get("categoria", "")
         formas = [concepto.get("termino_canonico", "")] + list(concepto.get("variaciones_lexicas", []))
         for forma in formas:
-            clave = normalizar(str(forma))
+            clave = _stem_frase(str(forma))
             if clave:
                 forma_a_concepto.setdefault(clave, id_concepto)
 
-    return forma_a_concepto, categoria_de
+    forma_ordenada = dict(sorted(forma_a_concepto.items(), key=lambda kv: len(kv[0].split()), reverse=True))
+    return forma_ordenada, categoria_de
 
 
 @lru_cache(maxsize=None)
-def _patron(forma: str) -> re.Pattern:
-    """Forma normalizada -> regex con límites de palabra (evita 'papa' dentro de 'papado')."""
-    return re.compile(r"(?<!\w)" + re.escape(forma) + r"(?!\w)")
+def _patron(forma_stem: str) -> re.Pattern:
+    """Forma con stemming -> regex con límites de palabra."""
+    return re.compile(r"(?<!\w)" + re.escape(forma_stem) + r"(?!\w)")
 
 
 def detectar_conceptos(texto: str) -> dict[str, str]:
-    """Conceptos del tesauro presentes en el texto.
+    """Conceptos del tesauro presentes en el texto (con stemming morfológico).
 
-    :param texto: texto libre (se normaliza internamente).
+    :param texto: texto libre (se normaliza y aplica stemming internamente).
     :return: {id_concepto: categoría}. Vacío si el texto no activa ninguno.
     """
     if not texto:
         return {}
 
-    norm = normalizar(texto)
+    norm_stem = _stem_frase(texto)
+    if not norm_stem:
+        return {}
+
     forma_a_concepto, categoria_de = _indice_tesauro()
     encontrados: dict[str, str] = {}
 
-    for forma, id_concepto in forma_a_concepto.items():
-        if id_concepto in encontrados or forma not in norm:
+    for forma_stem, id_concepto in forma_a_concepto.items():
+        if id_concepto in encontrados or forma_stem not in norm_stem:
             continue
-        if _patron(forma).search(norm):
+        if _patron(forma_stem).search(norm_stem):
             encontrados[id_concepto] = categoria_de[id_concepto]
 
     return encontrados
 
 
-def coincidencia_ontologica(conceptos_premisa: dict[str, str], categoria: str) -> float | None:
-    """Señal SO: fracción de los conceptos de la premisa que caen en `categoria`.
+def coincidencia_ontologica(
+    conceptos_premisa: dict[str, str],
+    categoria: str,
+    conceptos_norma: dict[str, str] | None = None,
+) -> float | None:
+    """Señal SO simétrica (Opción 3A de auditoría).
 
-    Devuelve None (señal NO disponible) si la premisa no activó ningún concepto:
-    en ese caso el IVR excluye SO y renormaliza los pesos.
+    Combina dos dimensiones ontológicas:
+      1. Fracción de conceptos de la premisa respaldados por la categoría de la
+         norma (o presentes directamente en los conceptos de la norma). Cuando la
+         norma proviene de expansión dinámica con etiqueta genérica (p. ej.
+         "Normativa Externa (carga dinámica)"), se infieren además las categorías
+         de los conceptos detectados en el propio fragmento.
+      2. Fracción de conceptos de la norma que coinciden con los de la premisa
+         (|P ∩ N| / |N|). Si la norma no activa ningún concepto en su texto
+         (conceptos_norma == {}), este segundo término vale 0.0, evitando que
+         normas genéricas sin conceptos saturen a 1.0.
+
+    Si `conceptos_norma is None` (llamada simple sin texto de norma), devuelve
+    únicamente la primera fracción por compatibilidad.
+    Devuelve None si la premisa no activó ningún concepto (señal no disponible).
     """
     if not conceptos_premisa:
         return None
-    coinciden = sum(1 for cat in conceptos_premisa.values() if cat == categoria)
-    return coinciden / len(conceptos_premisa)
+
+    categorias_efectivas = {categoria}
+    if conceptos_norma:
+        _, categoria_de_tesauro = _indice_tesauro()
+        if categoria not in set(categoria_de_tesauro.values()):
+            categorias_efectivas |= set(conceptos_norma.values())
+
+    coinciden_premisa = sum(
+        1
+        for cid, cat in conceptos_premisa.items()
+        if cat in categorias_efectivas or (conceptos_norma is not None and cid in conceptos_norma)
+    )
+    frac_premisa = coinciden_premisa / len(conceptos_premisa)
+
+    if conceptos_norma is None:
+        return frac_premisa
+
+    if not conceptos_norma:
+        return 0.5 * frac_premisa
+
+    compartidos = len(set(conceptos_premisa) & set(conceptos_norma))
+    frac_norma = compartidos / len(conceptos_norma)
+    return 0.5 * frac_premisa + 0.5 * frac_norma
 
 
 # ----------------------------------------------------------------------------------------
@@ -131,8 +198,13 @@ def coincidencia_ontologica(conceptos_premisa: dict[str, str], categoria: str) -
 # ----------------------------------------------------------------------------------------
 
 def _contenido(texto: str) -> list[str]:
-    """Tokens normalizados del texto, sin palabras vacías (ver PALABRAS_VACIAS)."""
-    return [t for t in _TOKENS.findall(normalizar(texto)) if t not in PALABRAS_VACIAS]
+    """Tokens normalizados del texto con stemming morfológico, sin palabras vacías.
+
+    Usa Snowball Stemmer en español para que variaciones de género y número
+    (necesario/necesaria, obispo/obispos) coincidan en los n-gramas léxicos.
+    """
+    tokens = [t for t in _TOKENS.findall(normalizar(texto)) if t not in PALABRAS_VACIAS]
+    return _stem_tokens(tokens)
 
 
 def _ngramas(tokens: list[str], n: int) -> set[str]:
@@ -167,18 +239,27 @@ def similitud_literal(premisa: str, texto: str, n: int = 2, metrica: str = "cont
     if not tokens_premisa or not tokens_texto:
         return 0.0
 
+    def _calcular_n(k: int) -> float:
+        a, b = _ngramas(tokens_premisa, k), _ngramas(tokens_texto, k)
+        if not a or not b:
+            return 0.0
+        comunes = len(a & b)
+        if metrica == "contencion":
+            return comunes / len(a)
+        return 2 * comunes / (len(a) + len(b))
+
     if len(tokens_premisa) < n:
         # Premisa demasiado corta (p. ej. "los divorciados"): se compara por palabras.
-        n = 1
+        return _calcular_n(1)
 
-    a, b = _ngramas(tokens_premisa, n), _ngramas(tokens_texto, n)
-    if not a or not b:
-        return 0.0
+    if n > 1 and len(tokens_premisa) < 12:
+        # Opción 1C de auditoría: en premisas cortas (< 12 tokens de contenido),
+        # los bigramas puros se rompen ante incisos normativos ("El bautismo, puerta
+        # de los sacramentos... es necesaria para la salvación"). Promediar unigramas
+        # y n-gramas con stemming evita el colapso a 0.0 y premia el orden exacto.
+        return 0.5 * _calcular_n(1) + 0.5 * _calcular_n(n)
 
-    comunes = len(a & b)
-    if metrica == "contencion":
-        return comunes / len(a)
-    return 2 * comunes / (len(a) + len(b))
+    return _calcular_n(n)
 
 
 def _terminos_compartidos(conceptos_premisa: dict[str, str], conceptos_norma: dict[str, str]) -> float:
@@ -197,23 +278,41 @@ def _terminos_compartidos(conceptos_premisa: dict[str, str], conceptos_norma: di
 # ----------------------------------------------------------------------------------------
 
 def _recortar(valor) -> float:
-    """Fuerza la señal al rango [0, 1] (el coseno y los metadatos pueden salirse un poco)."""
+    """Fuerza la señal al rango [0, 1], saneando explícitamente NaN e infinitos."""
     try:
-        return min(max(float(valor), 0.0), 1.0)
+        v = float(valor)
     except (TypeError, ValueError):
         return 0.0
+    if math.isnan(v) or math.isinf(v):
+        return 0.0
+    return min(max(v, 0.0), 1.0)
 
 
 def _maximo(valores: list):
-    """Máximo ignorando los None (señal no disponible); None si no queda ninguno."""
-    presentes = [v for v in valores if v is not None]
+    """Máximo ignorando los None y NaN; None si no queda ninguno."""
+    presentes = [float(v) for v in valores if v is not None and not (isinstance(v, float) and (math.isnan(v) or math.isinf(v)))]
     return max(presentes) if presentes else None
 
 
 def _medio(valores: list):
-    """Media ignorando los None; None si no queda ninguno."""
-    presentes = [v for v in valores if v is not None]
+    """Media ignorando los None y NaN; None si no queda ninguno."""
+    presentes = [float(v) for v in valores if v is not None and not (isinstance(v, float) and (math.isnan(v) or math.isinf(v)))]
     return sum(presentes) / len(presentes) if presentes else None
+
+
+def _minimo(valores: list):
+    """Mínimo ignorando los None y NaN; None si no queda ninguno."""
+    presentes = []
+    for v in valores:
+        if v is None:
+            continue
+        try:
+            fv = float(v)
+            if not (math.isnan(fv) or math.isinf(fv)):
+                presentes.append(fv)
+        except (TypeError, ValueError):
+            continue
+    return min(presentes) if presentes else None
 
 
 def pesos_ivr(config=None) -> dict[str, float]:
@@ -249,14 +348,20 @@ def calcular_ivr_evidencia(senales: dict, pesos: dict) -> float:
     return numerador / denominador if denominador else 0.0
 
 
-def calcular_ivr(premisa: str, n_resultados: int | None = None, where: dict | None = None,
-                 pesos: dict | None = None) -> dict:
+def calcular_ivr(
+    premisa: str,
+    n_resultados: int | None = None,
+    where: dict | None = None,
+    pesos: dict | None = None,
+    consultar_fn: Callable[..., list[dict]] | None = None,
+) -> dict:
     """Recupera evidencias con el RAG y las puntúa con el IVR.
 
     :param premisa: texto de la noticia (o afirmación) a evaluar.
     :param n_resultados: evidencias a recuperar; por defecto config.toml → [ivr] n_resultados.
     :param where: filtro de metadata opcional, igual que en `consultar()`.
     :param pesos: sobreescribe los pesos de config (útil para la ablación del TFG).
+    :param consultar_fn: función opcional de recuperación (p. ej. `SesionExpansion.consultar_combinado`).
     :return: informe con las evidencias reordenadas por IVR. Si no hay evidencias
         devuelve {"ok": False, "motivo": ..., "evidencias": []}.
 
@@ -272,11 +377,19 @@ def calcular_ivr(premisa: str, n_resultados: int | None = None, where: dict | No
     if pesos is None:
         pesos = pesos_ivr(settings)
 
-    evidencias_crudas = consultar(
-        premisa,
-        n_resultados=conf.n_resultados if n_resultados is None else n_resultados,
-        where=where,
-    )
+    n_res = conf.n_resultados if n_resultados is None else n_resultados
+    if consultar_fn is None:
+        evidencias_crudas = consultar(
+            premisa,
+            n_resultados=n_res,
+            where=where,
+        )
+    else:
+        evidencias_crudas = (
+            consultar_fn(premisa, n_res, where)
+            if where is not None
+            else consultar_fn(premisa, n_res)
+        )
     if not evidencias_crudas:
         return {
             "ok": False,
@@ -291,12 +404,13 @@ def calcular_ivr(premisa: str, n_resultados: int | None = None, where: dict | No
 
     evidencias = []
     for posicion, evidencia in enumerate(evidencias_crudas, start=1):
+        conceptos_norma = detectar_conceptos(evidencia["texto"])
         senales = {
             "sb": _recortar(evidencia["similitud"]),
             "literal": similitud_literal(premisa, evidencia["texto"], conf.n_gramas, conf.metrica_literal),
-            "ontologico": coincidencia_ontologica(conceptos_premisa, evidencia["categoria"]),
+            "ontologico": coincidencia_ontologica(conceptos_premisa, evidencia["categoria"], conceptos_norma),
             "autoridad": _recortar(evidencia["nivel_autoridad"]),
-            "terminos_compartidos": _terminos_compartidos(conceptos_premisa, detectar_conceptos(evidencia["texto"])),
+            "terminos_compartidos": _terminos_compartidos(conceptos_premisa, conceptos_norma),
         }
         evidencias.append({
             **evidencia,
@@ -348,7 +462,7 @@ def vector_caracteristicas(informe: dict) -> dict[str, float]:
     ivr_max, ivr_medio, ivr_min = informe["ivr_max"], informe["ivr_medio"], informe["ivr_min"]
     sb_max = senales_max["sb"] or 0.0
     sb_medio = _medio([e["senales"]["sb"] for e in evidencias]) or 0.0
-    sb_min = min(e["senales"]["sb"] for e in evidencias)
+    sb_min = _minimo([e["senales"]["sb"] for e in evidencias]) or 0.0
     ontologico_max = senales_max["ontologico"]
 
     return {
@@ -372,9 +486,27 @@ def vector_caracteristicas(informe: dict) -> dict[str, float]:
 
 
 if __name__ == "__main__":
-    premisa = " ".join(sys.argv[1:]).strip() or "El bautismo esta prohibido"
+    import argparse
 
-    informe = calcular_ivr(premisa)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+    ap = argparse.ArgumentParser(description="Calcula el IVR de una premisa contra el corpus canónico.")
+    ap.add_argument("premisa", nargs="*", help="Premisa a evaluar.")
+    ap.add_argument("--pdf", default=None, help="Ruta opcional a un PDF externo (expansión dinámica).")
+    args = ap.parse_args()
+
+    premisa = " ".join(args.premisa).strip() or "El bautismo esta prohibido"
+
+    if args.pdf:
+        from src.expansion_dinamica import SesionExpansion
+        with SesionExpansion() as sesion:
+            res_pdf = sesion.cargar_pdf(args.pdf)
+            print(f"\n[Expansión dinámica] PDF cargado: {res_pdf.nombre} ({res_pdf.fragmentos} fragmentos, J={res_pdf.nivel_autoridad})")
+            informe = calcular_ivr(premisa, consultar_fn=sesion.consultar_combinado)
+    else:
+        informe = calcular_ivr(premisa)
+
     print(f"\nPremisa: {premisa}")
     if not informe["ok"]:
         print(f"Sin evidencias: {informe['motivo']}")
@@ -387,6 +519,7 @@ if __name__ == "__main__":
     for evidencia in informe["evidencias"]:
         senales = evidencia["senales"]
         so = "n/a" if senales["ontologico"] is None else f"{senales['ontologico']:.3f}"
-        print(f"\n[{evidencia['posicion_rag']}→{evidencia['ivr']:.3f}] {evidencia['cita']}")
+        origen = f" [{evidencia['origen']}]" if "origen" in evidencia else ""
+        print(f"\n[{evidencia['posicion_rag']}→{evidencia['ivr']:.3f}]{origen} {evidencia['cita']}")
         print(f"  SB={senales['sb']:.3f}  L={senales['literal']:.3f}  SO={so}  J={senales['autoridad']:.3f}")
         print(f"  {evidencia['texto'][:180].strip()}...")

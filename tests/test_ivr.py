@@ -11,6 +11,7 @@ términos estas pruebas siguen siendo válidas.
 from __future__ import annotations
 
 import json
+import math
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -228,6 +229,121 @@ class TestInformeIvr(unittest.TestCase):
             informe = ivr.calcular_ivr(self.PREMISA, pesos={"sb": 1.0, "literal": 0.0,
                                                           "ontologico": 0.0, "autoridad": 0.0})
         self.assertAlmostEqual(informe["ivr_max"], 0.5)
+
+
+class TestAuditoriaRegresion(unittest.TestCase):
+    """Tests de regresión de los bugs identificados en la auditoría del IVR."""
+
+    def test_literal_detecta_variacion_morfologica(self):
+        """Bug #1: necesaria vs necesario debe tener similitud literal > 0."""
+        premisa = "El bautismo es necesario para la salvacion"
+        norma = "El bautismo, puerta de los sacramentos... necesaria para la salvacion..."
+        sim = ivr.similitud_literal(premisa, norma)
+        self.assertGreater(sim, 0.0)
+
+    def test_tesauro_detecta_plural(self):
+        """Bug #2: plurales y flexiones verbales deben detectarse en el tesauro vía stemmer."""
+        det_obispos = ivr.detectar_conceptos("los obispos de la region")
+        self.assertIn("ID_OBISPO_DIOCESANO", det_obispos)
+
+        det_bautismos = ivr.detectar_conceptos("los bautismos de los ninos")
+        self.assertIn("ID_BAUTISMO", det_bautismos)
+
+        det_papas = ivr.detectar_conceptos("los papas se reunieron")
+        self.assertIn("ID_PAPA", det_papas)
+
+        det_verbos = ivr.detectar_conceptos("los fieles se bautizaron, comulgaron y no apostataron")
+        self.assertIn("ID_BAUTISMO", det_verbos)
+        self.assertIn("ID_EUCARISTIA", det_verbos)
+        self.assertIn("ID_APOSTASIA", det_verbos)
+
+    def test_tesauro_sin_colisiones_de_stem(self):
+        """Auditoría Fase 2: ninguna forma léxica de dos conceptos distintos debe colisionar en stem."""
+        stems_vistos: dict[str, str] = {}
+        for id_concepto, info in conceptos_del_tesauro().items():
+            formas = [info.get("termino_canonico", "")] + list(info.get("variaciones_lexicas", []))
+            for forma in formas:
+                stem = ivr._stem_frase(forma)
+                if not stem:
+                    continue
+                if stem in stems_vistos and stems_vistos[stem] != id_concepto:
+                    self.fail(
+                        f"Colisión de stem {stem!r} ({forma!r}) entre {stems_vistos[stem]} y {id_concepto}"
+                    )
+                stems_vistos[stem] = id_concepto
+
+    def test_so_no_satura_con_un_concepto(self):
+        """Bug #3: SO no debe saturar a 1.0 si la norma tiene múltiples conceptos y comparte solo uno."""
+        p = {"ID_BAUTISMO": "Sacramentos y Liturgia"}
+        n = {
+            "ID_BAUTISMO": "Sacramentos y Liturgia",
+            "ID_EUCARISTIA": "Sacramentos y Liturgia",
+            "ID_PENITENCIA": "Sacramentos y Liturgia",
+            "ID_CONFIRMACION": "Sacramentos y Liturgia",
+        }
+        so = ivr.coincidencia_ontologica(p, "Sacramentos y Liturgia", conceptos_norma=n)
+        self.assertIsNotNone(so)
+        self.assertLess(so, 1.0)
+        self.assertGreater(so, 0.5)
+        # Norma sin conceptos detectados ({}) no debe saturar a 1.0 como si fuera None
+        so_vacia = ivr.coincidencia_ontologica(p, "Sacramentos y Liturgia", conceptos_norma={})
+        self.assertAlmostEqual(so_vacia, 0.5)
+        # Norma de otra categoría y sin conceptos compartidos debe dar 0.0 (no 0.25)
+        so_ajena = ivr.coincidencia_ontologica(
+            p, "Derecho Penal Eclesiástico", conceptos_norma={"ID_CENSURA": "Derecho Penal Eclesiástico"}
+        )
+        self.assertEqual(so_ajena, 0.0)
+
+    def test_ivr_no_contamina_con_nan(self):
+        """Bug #4: NaN debe sanearse a 0.0 sin propagarse al IVR ni romper el ordenamiento."""
+        self.assertEqual(ivr._recortar(float("nan")), 0.0)
+        senales = {"sb": float("nan"), "literal": 0.5, "ontologico": None, "autoridad": 1.0}
+        res = ivr.calcular_ivr_evidencia(senales, ivr.pesos_ivr())
+        self.assertFalse(math.isnan(res))
+        self.assertGreater(res, 0.0)
+
+    def test_sb_min_no_lanza_con_none(self):
+        """Bug #5: sb_min no debe lanzar TypeError si hay evidencias con señal ausente."""
+        informe = {
+            "ok": True,
+            "n_evidencias": 2,
+            "conceptos_premisa": {},
+            "ivr_max": 0.5, "ivr_medio": 0.5, "ivr_min": 0.5,
+            "senales_max": {"sb": 0.5, "literal": 0.0, "ontologico": None, "autoridad": 1.0, "terminos_compartidos": 0.0},
+            "evidencias": [
+                {"senales": {"sb": 0.5, "literal": 0.0, "ontologico": None, "autoridad": 1.0}},
+                {"senales": {"sb": None, "literal": 0.0, "ontologico": None, "autoridad": 1.0}},
+            ],
+        }
+        vec = ivr.vector_caracteristicas(informe)
+        self.assertIn("sb_min", vec)
+        self.assertEqual(vec["sb_min"], 0.5)
+
+    def test_ivr_discrimina_relevante_vs_irrelevante(self):
+        """Prueba de discriminación: evidencia doctrinal consistente debe superar con claridad a una irrelevante."""
+        ev_doctrina = evidencia_falsa("El bautismo es necesario para la salvacion y remite el pecado", 0.85, "Sacramentos y Liturgia", 1.0)
+        ev_ajena = evidencia_falsa("Las elecciones municipales del transporte publico", 0.20, "Relaciones Internacionales y Ecumenismo", 0.66)
+
+        with mock.patch.object(ivr, "consultar", return_value=[ev_doctrina, ev_ajena]):
+            inf = ivr.calcular_ivr("El bautismo es necesario para la salvacion")
+
+        self.assertTrue(inf["ok"])
+        self.assertGreater(inf["evidencias"][0]["ivr"], inf["evidencias"][1]["ivr"] + 0.20)
+
+    def test_expansion_dinamica_integra_con_calcular_ivr(self):
+        """Expansión dinámica: consultar_fn personalizado e inferencia ontológica en PDF externo."""
+        ev_pdf = evidencia_falsa(
+            "El parroco acompanara a los novios en la preparacion al matrimonio canonico.",
+            0.88,
+            "Normativa Externa (carga dinámica)",
+            0.33,
+        )
+        inf = ivr.calcular_ivr(
+            "El bautismo y el matrimonio son sacramentos",
+            consultar_fn=lambda premisa, n_res: [ev_pdf],
+        )
+        self.assertTrue(inf["ok"])
+        self.assertGreater(inf["evidencias"][0]["senales"]["ontologico"], 0.5)
 
 
 if __name__ == "__main__":

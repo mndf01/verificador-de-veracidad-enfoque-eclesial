@@ -27,6 +27,7 @@ dependencies = [
     "pandas>=2.2",
     "scikit-learn>=1.4",
     "joblib>=1.4",   # guardar/cargar el modelo RF entrenado (src/modelo/rf.py)
+    "snowballstemmer>=2.2",
 ]
 
 [project.optional-dependencies]
@@ -46,5 +47,5 @@ verificador = "src.cli:main"
 # `python -m src.*`). Además de `config` como módulo top-level, se registran los
 # paquetes `src` para que el entry point `verificador` funcione tras
 # `pip install -e .`.
-packages = ["src", "src.base_datos", "src.corp_extractor", "src.expansion_dinamica", "src.modelo", "src.procesamiento_nlp", "src.vectorizacion", "src.web_extractor", "src.cli"]
+packages = ["src", "src.base_datos", "src.corp_extractor", "src.expansion_dinamica", "src.modelo", "src.procesamiento_nlp", "src.vectorizacion", "src.web_extractor", "src.cli", "src.dataset"]
 py-modules = ['config']

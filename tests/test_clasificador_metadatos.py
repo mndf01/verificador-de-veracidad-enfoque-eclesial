@@ -94,6 +94,21 @@ class TestOtrasFuentesNoCambian(unittest.TestCase):
         [item] = clasificar(reglas["condicion_fuente"], [numeral(1, "Compendio > Parte I")])
         self.assertEqual((item["categoria"], item["nivel_autoridad"]), (reglas["categoria_default"], reglas["autoridad_default"]))
 
+    def test_jerarquia_graduada_de_niveles_de_autoridad(self):
+        """Fase 4 de auditoría: CIC (1.0) > Constituciones (0.85) > Decretos/Declaraciones (0.70) > Compendio (0.55)."""
+        aut_cic = REGLAS["CANONICO"]["autoridad_default"]
+        docs = REGLAS["VATICANO_II"]["mapeo_documentos"]
+        constituciones = ("Lumen gentium", "Dei Verbum", "Sacrosanctum concilium", "Gaudium et spes")
+        aut_const = {docs[c]["autoridad"] for c in constituciones}
+        aut_decretos_decl = {docs[d]["autoridad"] for d in docs if d not in constituciones}
+        aut_comp = REGLAS["COMPENDIO"]["autoridad_default"]
+
+        self.assertEqual(aut_cic, 1.0)
+        self.assertEqual(aut_const, {0.85})
+        self.assertEqual(aut_decretos_decl, {0.70})
+        self.assertEqual(aut_comp, 0.55)
+        self.assertEqual(len(docs), 16)
+
 
 @unittest.skipUnless(RUTA_CIC_CRUDO.exists(), "no está el corpus crudo del Código en esta máquina")
 class TestConElCorpusRealDelCodigo(unittest.TestCase):

@@ -19,6 +19,7 @@ son perezosos para poder probarla con dobles de prueba.
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -32,7 +33,7 @@ from .procesamiento import procesar_pdf
 log = logging.getLogger(__name__)
 
 TIPO_CORPUS = "expansion_dinamica"
-NIVELES_AUTORIDAD = (0.33, 0.66, 1.0)   # Nivel 1 / 2 / 3 según Rol.pdf
+NIVELES_AUTORIDAD = (0.33, 0.55, 0.66, 0.70, 0.85, 1.0)
 _SEPARADOR_CONTEXTO = " > "             # igual que el corpus base
 
 
@@ -140,7 +141,7 @@ class SesionExpansion:
         """Procesa e indexa un PDF. Si falla a mitad de camino, no deja nada a medio cargar.
 
         Args:
-            nivel_autoridad: 0.33 (norma local, por defecto), 0.66 o 1.0.
+            nivel_autoridad: 0.33 (norma local, por defecto), 0.55, 0.66, 0.70, 0.85 o 1.0.
             categoria: etiqueta temática; por defecto "Normativa Externa (carga dinámica)".
             url_origen: opcional, para mostrarla en la cita.
 
@@ -273,11 +274,16 @@ class SesionExpansion:
         ):
             documento = meta["fuente"]
             paginas = _etiqueta_paginas(meta["pagina_inicio"], meta["pagina_fin"])
+            try:
+                dist_f = float(distancia)
+                sim = 0.0 if (math.isnan(dist_f) or math.isinf(dist_f)) else min(max(1.0 - dist_f, 0.0), 1.0)
+            except (TypeError, ValueError):
+                sim = 0.0
             contratos.append({
                 # --- mismo contrato que chromaDB.consultar() ---
                 "id_chroma": id_chroma,
                 "texto": texto,
-                "similitud": max(1 - distancia, 0),
+                "similitud": sim,
                 "contexto": meta["contexto_jerarquico"],
                 "fuente": documento,
                 "id_norma": meta["id_norma"],

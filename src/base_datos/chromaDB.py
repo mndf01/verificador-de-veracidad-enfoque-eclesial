@@ -1,4 +1,4 @@
-import json, logging, chromadb, chromadb.errors
+import json, logging, math, chromadb, chromadb.errors
 from glob import glob
 from importlib.metadata import metadata
 
@@ -209,30 +209,6 @@ def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) ->
     """
     Consultar documentos indexados en una colección bajo ciertas condiciones, retornando resultados
     ordenados según la similitud con la premisa dada.
-
-    El método realiza validaciones iniciales sobre los parámetros de entrada y, en caso de que las
-    condiciones no se cumplan, devuelve una lista vacía. Si las condiciones son válidas, se intenta
-    realizar una consulta a la colección especificada, considerando las condiciones adicionales
-    proporcionadas en el parámetro where.
-
-    :param premisa: Cadena de texto que representa la consulta o premisa para buscar documentos
-        relacionados.
-    :type premisa: str
-
-    :param n_resultados: Número máximo de resultados que se desean obtener. Debe ser un valor
-        entero mayor a cero. Por defecto, es 5.
-    :type n_resultados: int
-
-    :param where: Diccionario opcional que contiene condiciones adicionales para filtrar los
-        resultados. Las claves válidas son: "fuente", "tipo_corpus", "id_norma", "contexto_jerarquico",
-        "categoria", "nivel_autoridad", y "url_origen".
-    :type where: dict | None
-
-    :return: Una lista de diccionarios, donde cada diccionario contiene información estructurada de
-        un documento relevante, incluyendo su similitud, texto, contexto, fuente y otros metadatos
-        relacionados. Si no se encuentran documentos relevantes o ocurren errores, devuelve una lista
-        vacía.
-    :rtype: list[dict]
     """
     settings = obtener_configuraciones()
     coleccion = get_coleccion(coleccion=settings.chroma.coleccion, crear=False)
@@ -285,10 +261,15 @@ def consultar(premisa: str, n_resultados: int = 5, where: dict | None = None) ->
 
     contratos = []
     for id_chroma, meta, document, distance in zip(ids, metadatas, documents, distances):
+        try:
+            dist_f = float(distance)
+            sim = 0.0 if (math.isnan(dist_f) or math.isinf(dist_f)) else min(max(1.0 - dist_f, 0.0), 1.0)
+        except (TypeError, ValueError):
+            sim = 0.0
         contratos.append({
             "id_chroma": id_chroma,
             "texto": document,
-            "similitud": max(1 - distance, 0),
+            "similitud": sim,
             "contexto": meta["contexto_jerarquico"],
             "fuente": meta["fuente"],
             "id_norma": meta["id_norma"],

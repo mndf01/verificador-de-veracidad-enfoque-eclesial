@@ -129,12 +129,12 @@
 
     "ID_OBISPO_DIOCESANO": {
       "termino_canonico": "Obispo diocesano",
-      "variaciones_lexicas": ["Monseñor", "Prelado", "Jefe de la diócesis", "Obispo de la diócesis"],
+      "variaciones_lexicas": ["Monseñor", "Prelado", "Jefe de la diócesis", "Obispo de la diócesis", "Obispo"],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_PARROCO": {
       "termino_canonico": "Párroco",
-      "variaciones_lexicas": ["Cura párroco", "Sacerdote de la parroquia", "Encargado de la parroquia", "Cura del pueblo"],
+      "variaciones_lexicas": ["Cura párroco", "Sacerdote de la parroquia", "Encargado de la parroquia", "Cura del pueblo", "Sacerdote"],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CONFERENCIA_EPISCOPAL": {
@@ -165,7 +165,7 @@
     },
     "ID_EUCARISTIA": {
       "termino_canonico": "Santísima Eucaristía",
-      "variaciones_lexicas": ["Misa", "Santa Misa", "Comulgar", "Hostia consagrada", "Sacrificio eucarístico"],
+      "variaciones_lexicas": ["Misa", "Santa Misa", "Comulgar", "Hostia consagrada", "Sacrificio eucarístico", "Eucaristía"],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_PENITENCIA": {

@@ -1,0 +1,37 @@
+# Dominios excluidos del dataset de entrenamiento
+#
+# Motivo: bloquean la extracción automática (anti-scraping, paywall, JS obligatorio)
+# o sirven páginas sin contenido textual extraíble por trafilatura.
+# Se detectaron probando una URL representativa de cada dominio (ver MAPA-PROYECTO.md).
+#
+# Formato: un dominio por línea. Las líneas que empiezan por # se ignoran.
+# Al excluir un dominio se excluyen TODAS sus URLs, en cualquier categoría.
+#
+# Para regenerar la lista:  .venv/bin/python scripts/detectar_dominios_bloqueados.py
+
+# --- afin ---
+thecatholicherald.com
+catholicreview.org
+encuentra.com
+remnantnewspaper.com
+uscatholic.org
+
+# --- critica ---
+nytimes.com
+proceso.com.mx
+
+# --- neutral ---
+hipertextual.com
+naukas.com
+religionnews.com
+
+# --- no_definido ---
+ecartelera.com
+elcolombiano.com
+eleconomista.es
+eloutput.com
+elperiodico.com
+espn.com.mx
+marca.com
+tudn.com
+viajes.nationalgeographic.com.es

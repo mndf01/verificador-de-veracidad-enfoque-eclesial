@@ -281,7 +281,7 @@ verificador --help                  # tras `pip install -e .` (entry point)
 |---------|----------|
 | `evaluar URL` | URL → texto/titular → premisa → RAG (corpus base + `--pdf` opcional) → IVR → RF → informe + veredicto |
 | `setup` | ETL completo + indexa el corpus en Chroma y verifica sincronización (`2965` docs) |
-| `dataset-generar` | Recorre noticias de `iglesia.db` con ventana deslizante (`175` palabras, solape `50`) y genera el CSV de entrenamiento (`16` características + `veredicto`) |
+| `dataset-generar` | Recorre noticias de `iglesia.db` con ventana deslizante (`175` palabras, solape `50`) y genera el CSV de entrenamiento. Etiqueta 3 clases: `proximo` / `distante` (por percentil del IVR) y `no_definido` (por construcción). Usa **caché en disco** y **excluye dominios bloqueados** |
 | `entrenar` | Entrena y persiste el Random Forest a `data/modelo_rf.joblib` |
 
 **Ejemplo 1 (`evaluar`, modo interactivo con una URL real):**
@@ -526,16 +526,54 @@ premisa ──► ivr.calcular_ivr() ──► informe ──► vector_caracter
 Generar el dataset desde `iglesia.db` y entrenar:
 
 ```bash
-# 1. Diagnóstico rápido sobre una muestra balanceada de 30 noticias (sin escribir CSV)
+# 1. Diagnóstico rápido sobre una muestra balanceada (sin escribir CSV)
 python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 30 --solo-diagnostico
 
-# 2. Generar el CSV etiquetado
-python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 0 --salida data/etiquetado.csv
+# 2. Generar el CSV etiquetado (usa caché: re-ejecutar no re-descarga)
+python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 500 --salida data/etiquetado.csv
 
 # 3. Entrenar y guardar el modelo Random Forest en disco
 python -m src.cli entrenar --dataset data/etiquetado.csv --salida data/modelo_rf.joblib
-# (o directamente: python -m src.modelo.rf --entrenar data/etiquetado.csv --salida data/modelo_rf.joblib)
 ```
+
+#### Caché de IVR (`data/cache_ivr.jsonl`)
+
+Descargar y calcular el IVR de una noticia cuesta **~5 s** (dominado por la petición
+HTTP). El caché guarda el texto extraído y el detalle del IVR por ventana, para no
+repetirlo al re-etiquetar o cambiar umbrales.
+
+- Guarda: `ventanas_detalle`, `senales_max`, `conceptos_premisa`, IVR agregados.
+- **No** guarda la etiqueta `veredicto`: depende de los umbrales y se recalcula.
+- Los fallos se cachean también (`ok: false`) para no reintentar dominios bloqueados.
+- Para forzar re-descarga: `--cache /tmp/otro_cache.jsonl`.
+
+#### Exclusión de dominios bloqueados
+
+`src/dataset/dominios_excluidos.txt` lista **19 dominios** que bloquean la extracción
+automática (anti-scraping, paywall, JS obligatorio), detectados probando una URL de
+cada uno.
+
+| Sin exclusión | Con exclusión |
+|---|---|
+| 23,5 % de fallos; `afin` cae a 12 de 50 muestras | 2,3 % de fallos; clases balanceadas (72/75/72/74) |
+
+Para incluir los bloqueados puntualmente: `--incluir-bloqueados`.
+
+#### Etiquetado: 3 clases
+
+| Clase | Regla |
+|---|---|
+| `proximo` | IVR ≥ **P85** de los medios eclesiales (top 15 % de similitud) |
+| `distante` | IVR < P85, siendo del ámbito eclesial |
+| `no_definido` | **Por construcción**: la noticia es de un tema que el corpus no cubre |
+
+El umbral se calcula por **percentiles**, no como valor absoluto: un corte fijo de
+0.60 producía 5 ejemplos de `proximo` sobre 293 (1,7 %), insuficiente para que el RF
+aprenda la clase. El percentil se calcula **solo con noticias de medios eclesiales**,
+porque las de `no_definido` están fuera del corpus y distorsionarían el corte.
+
+El CSV incluye además `categoria_medio` (afin/critica/neutral) y `dominio` como
+columnas de **análisis** — nunca como features del modelo.
 
 Predecir desde consola (ya con el modelo guardado):
 

@@ -59,13 +59,18 @@ def construir_parser() -> argparse.ArgumentParser:
                       help="Ruta a iglesia.db (SQLite con tabla urls).")
     p_ds.add_argument("--salida", default="data/etiquetado.csv", help="CSV de salida.")
     p_ds.add_argument("--n", type=int, default=30, help="Tamaño de la muestra (0 = todas).")
-    p_ds.add_argument("--estrategia", choices=["proxy", "umbral", "debil"], default="debil",
-                      help="Como asignar el veredicto: proxy=categoria del medio, "
-                           "umbral=por IVR, debil=categoria prior + IVR.")
+    p_ds.add_argument("--estrategia", choices=["construccion", "umbral"], default="construccion",
+                      help="construccion=no_definido por categoria + umbral IVR (recomendada); "
+                           "umbral=todo por IVR.")
     p_ds.add_argument("--ventana", type=int, default=175, help="Palabras por ventana.")
     p_ds.add_argument("--solape", type=int, default=50, help="Palabras de solape entre ventanas.")
     p_ds.add_argument("--solo-diagnostico", action="store_true",
                       help="No escribe CSV; solo imprime el diagnostico de la muestra.")
+    p_ds.add_argument("--incluir-bloqueados", action="store_true",
+                      help="No aplica la lista de dominios excluidos (dominios_excluidos.txt).")
+    p_ds.add_argument("--cache", default=None,
+                      help="Ruta del cache IVR (por defecto data/cache_ivr.jsonl). "
+                           "Evita re-descargar noticias ya procesadas.")
     p_ds.set_defaults(func=_cmd_dataset)
 
     # ---- entrenar ----
@@ -257,7 +262,14 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
     from collections import Counter
 
     from src.dataset import leer_urls, muestra_balanceada, procesar_noticia
-    from src.dataset.agregacion import agregar_features, asignar_veredicto
+    from src.dataset.agregacion import (
+        PERCENTIL_PROXIMO,
+        agregar_features,
+        asignar_veredicto,
+        calcular_umbral_proximo,
+    )
+    from src.dataset.cache import CacheIVR
+    from src.dataset.generador import CATEGORIA_FUERA_DE_TEMA, dominios_excluidos, filtrar_excluidos
 
     try:
         urls = leer_urls(args.db)
@@ -269,7 +281,17 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
         print("✖ La base de URLs está vacía.", file=sys.stderr)
         return 1
 
-    seleccion = muestra_balanceada(urls, args.n) if args.n and args.n > 0 else urls
+    # Excluye dominios que bloquean la extracción (ver dominios_excluidos.txt).
+    excl = dominios_excluidos()
+    if args.incluir_bloqueados:
+        excl = frozenset()
+    urls_utiles = filtrar_excluidos(urls, excl)
+    if excl:
+        print(f"\nDominios excluidos (bloqueo anti-scraping): {len(excl)}"
+              f"  →  {len(urls) - len(urls_utiles)} URLs descartadas")
+
+    seleccion = (muestra_balanceada(urls_utiles, args.n, excluidos=frozenset())
+                 if args.n and args.n > 0 else urls_utiles)
     print(f"\n=== DATASET: {len(seleccion)} noticias "
           f"de {len(urls)} en la base ===")
     print(f"distribución: {dict(Counter(u.categoria for u in seleccion))}")
@@ -278,16 +300,33 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
 
     procesadas = []
     fallidas = []
+    cache = CacheIVR(args.cache)
+    print(f"caché IVR: {len(cache)} noticias ya procesadas ({cache.ruta})")
+    reutilizadas = 0
     for i, item in enumerate(seleccion, 1):
-        print(f"[{i}/{len(seleccion)}] {item.categoria:<7} {item.url[:66]}", end="  ", flush=True)
-        res = procesar_noticia(item, tam_ventana=args.ventana, solape=args.solape)
+        print(f"[{i}/{len(seleccion)}] {item.categoria:<12} {item.url[:60]}", end="  ", flush=True)
+
+        # Caché primero: evita volver a descargar y recalcular el IVR.
+        res = cache.obtener(item.url)
+        if res is not None:
+            reutilizadas += 1
+            etiqueta = "(caché)"
+        else:
+            res = procesar_noticia(item, tam_ventana=args.ventana, solape=args.solape)
+            cache.guardar(res)      # se guarda también si falló: no reintentar bloqueos
+            etiqueta = ""
+
         if not res.ok:
             fallidas.append((item.url, res.motivo))
-            print(f"✖ {res.motivo}")
+            print(f"✖ {res.motivo} {etiqueta}")
             continue
         procesadas.append(res)
         print(f"✓ {res.n_ventanas} ventanas | ivr_max={res.ivr_max:.3f} "
-              f"| con señal={res.n_ventanas_con_senal}")
+              f"| con señal={res.n_ventanas_con_senal} {etiqueta}")
+
+    if reutilizadas:
+        print(f"\n(caché: {reutilizadas} noticias reutilizadas sin re-descargar)")
+    print(f"(caché actualizado: {cache.ruta})")
 
     print(f"\n--- Resumen de la muestra ---")
     print(f"procesadas OK   : {len(procesadas)}")
@@ -302,7 +341,8 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
             if not grupo:
                 continue
             media_max = sum(r.ivr_max for r in grupo) / len(grupo)
-            print(f"  {cat:<8} n={len(grupo):<3} ivr_max medio={media_max:.3f}")
+            media_top3 = sum(r.ivr_top3 for r in grupo) / len(grupo)
+            print(f"  {cat:<12} n={len(grupo):<3} ivr_max medio={media_max:.3f}  top3 medio={media_top3:.3f}")
 
     if fallidas:
         print("\nfallidas (motivo):")
@@ -317,11 +357,25 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
         print("\n✖ Ninguna noticia se procesó; no se puede escribir el CSV.", file=sys.stderr)
         return 1
 
+    # --- Umbral por percentiles (decisión C) ---
+    # Se calcula SOLO con las noticias de medios eclesiales: las de `no_definido`
+    # están fuera del corpus y no deben influir en el corte.
+    ivr_eclesiales = [
+        (r.ivr_top3 if r.ivr_top3 > 0 else r.ivr_max)
+        for r in procesadas
+        if r.categoria != CATEGORIA_FUERA_DE_TEMA
+    ]
+    umbral = calcular_umbral_proximo(ivr_eclesiales, PERCENTIL_PROXIMO)
+    print(f"\n--- Umbral por percentiles ---")
+    print(f"proximo = top {100 - PERCENTIL_PROXIMO}% de similitud en medios eclesiales")
+    print(f"umbral calculado = {umbral:.4f}  (sobre {len(ivr_eclesiales)} noticias)")
+
     filas = []
     for res in procesadas:
         features = agregar_features(res)
-        veredicto = asignar_veredicto(res, args.estrategia)
-        filas.append({**features, "categoria_medio": res.categoria, "veredicto": veredicto})
+        veredicto = asignar_veredicto(res, args.estrategia, umbral_proximo=umbral)
+        filas.append({**features, "categoria_medio": res.categoria,
+                      "dominio": res.dominio, "veredicto": veredicto})
 
     _escribir_csv(args.salida, filas)
     print(f"\n✓ CSV escrito: {args.salida} ({len(filas)} filas)")
@@ -336,7 +390,7 @@ def _escribir_csv(ruta: str, filas: list[dict]) -> None:
 
     from src.modelo.rf import NOMBRES_CARACTERISTICAS
 
-    columnas = list(NOMBRES_CARACTERISTICAS) + ["categoria_medio", "veredicto"]
+    columnas = list(NOMBRES_CARACTERISTICAS) + ["categoria_medio", "dominio", "veredicto"]
     destino = _Path(ruta)
     if not destino.is_absolute():
         destino = _PROYECTO_RAIZ / destino

@@ -46,8 +46,13 @@ NOMBRES_CARACTERISTICAS = [
     "terminos_compartidos_max", "autoridad_max",
 ]
 
-# Clases del veredicto (traducir al español cuando llegue a la interfaz).
-CLASES_VEREDICTO = ["consistente", "inconsistente", "no_verificable"]
+# Clases del veredicto (similitud con el corpus, no verdad absoluta).
+CLASES_VEREDICTO = ["proximo", "distante", "no_definido"]
+
+# Columna que identifica el medio. Se usa para AGRUPAR en la evaluación, nunca
+# como feature: si el modelo viera el dominio memorizaría medios en vez de aprender
+# del contenido (data leakage).
+COLUMNA_DOMINIO = "dominio"
 
 
 def _X_de_informe(informe: dict) -> list[float]:
@@ -113,6 +118,94 @@ def predecir(clf: RandomForestClassifier, le: LabelEncoder | None, X_row: list[f
     }
 
 
+def evaluar(dataset: pd.DataFrame, columna_dominio: str = COLUMNA_DOMINIO) -> dict:
+    """Evalúa el modelo con DOS particiones para medir generalización real.
+
+    Por qué dos:
+      * **Aleatoria** (``train_test_split`` estratificado): mide el rendimiento
+        cuando el mismo medio puede aparecer en train y en test. Si el modelo se
+        apoya en el medio, aquí infla la exactitud.
+      * **Agrupada por dominio** (``GroupShuffleSplit``): los dominios del test NO
+        aparecen en train. Refleja el uso real (un medio nuevo que el sistema
+        nunca vio).
+
+    La diferencia entre ambas cuantifica cuánto del rendimiento es memorización
+    del medio y cuánto generalización de contenido. Es un resultado de tesis.
+
+    :return: dict con métricas de ambos escenarios + importancias de variables.
+    """
+    from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+    from sklearn.model_selection import GroupShuffleSplit, train_test_split
+
+    X = dataset[NOMBRES_CARACTERISTICAS].copy()
+    for col in X.columns:
+        X[col] = pd.to_numeric(X[col], errors="coerce").fillna(0.0)
+
+    le = LabelEncoder()
+    y = le.fit_transform(dataset["veredicto"])
+    clases = list(le.classes_)
+
+    resultado: dict = {"n_total": len(dataset), "clases": clases, "dominios_usados": 0}
+
+    # --- 1) Partición aleatoria estratificada ---
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X, y, test_size=0.25, random_state=42, stratify=y,
+    )
+    clf_r = _nuevo_clf()
+    clf_r.fit(X_tr, y_tr)
+    pred_r = clf_r.predict(X_te)
+    resultado["aleatorio"] = {
+        "accuracy": float(accuracy_score(y_te, pred_r)),
+        "n_test": int(len(y_te)),
+        "reporte": classification_report(y_te, pred_r, target_names=clases,
+                                         zero_division=0, output_dict=True),
+        "matriz": confusion_matrix(y_te, pred_r).tolist(),
+    }
+
+    # --- 2) Partición agrupada por dominio (medios no vistos en test) ---
+    tiene_dominio = columna_dominio in dataset.columns
+    if tiene_dominio and dataset[columna_dominio].nunique() > 2:
+        grupos = dataset[columna_dominio].astype(str).values
+        gss = GroupShuffleSplit(n_splits=1, test_size=0.25, random_state=42)
+        tr_idx, te_idx = next(gss.split(X, y, groups=grupos))
+        clf_g = _nuevo_clf()
+        clf_g.fit(X.iloc[tr_idx], y[tr_idx])
+        pred_g = clf_g.predict(X.iloc[te_idx])
+        resultado["dominios_usados"] = int(len(set(grupos)))
+        resultado["agrupado"] = {
+            "accuracy": float(accuracy_score(y[te_idx], pred_g)),
+            "n_test": int(len(te_idx)),
+            "dominios_train": int(len(set(grupos[tr_idx]))),
+            "dominios_test": int(len(set(grupos[te_idx]))),
+            "reporte": classification_report(y[te_idx], pred_g, target_names=clases,
+                                             zero_division=0, output_dict=True),
+            "matriz": confusion_matrix(y[te_idx], pred_g).tolist(),
+        }
+        resultado["importancias"] = dict(
+            sorted(zip(NOMBRES_CARACTERISTICAS, clf_g.feature_importances_),
+                   key=lambda kv: kv[1], reverse=True)
+        )
+    else:
+        resultado["agrupado"] = None
+        resultado["importancias"] = dict(
+            sorted(zip(NOMBRES_CARACTERISTICAS, clf_r.feature_importances_),
+                   key=lambda kv: kv[1], reverse=True)
+        )
+
+    return resultado
+
+
+def _nuevo_clf() -> RandomForestClassifier:
+    """Instancia un RF con los hiperparámetros del proyecto."""
+    return RandomForestClassifier(
+        n_estimators=300,
+        max_depth=None,
+        class_weight="balanced",
+        random_state=42,
+        n_jobs=-1,
+    )
+
+
 def guardar(clf, le, ruta: str | Path) -> None:
     """Persiste el modelo (joblib) para no reentrenar en cada predicción."""
     import joblib
@@ -128,6 +221,41 @@ def cargar(ruta: str | Path):
     return joblib.load(Path(ruta))
 
 
+def _imprimir_evaluacion(m: dict) -> None:
+    """Presenta en consola el resultado de `evaluar()`."""
+    ale = m["aleatorio"]
+    print(f"--- Partición ALEATORIA (mismo medio puede estar en train y test) ---")
+    print(f"  exactitud: {ale['accuracy']:.3f}   (n_test={ale['n_test']})")
+    for clase in m["clases"]:
+        r = ale["reporte"].get(clase, {})
+        if r:
+            print(f"    {clase:<12} precision={r['precision']:.2f} recall={r['recall']:.2f} f1={r['f1-score']:.2f} n={int(r['support'])}")
+
+    agr = m.get("agrupado")
+    if agr:
+        print(f"\n--- Partición AGRUPADA por dominio (medios NO vistos en test) ---")
+        print(f"  exactitud: {agr['accuracy']:.3f}   (n_test={agr['n_test']}, "
+              f"dominios train={agr['dominios_train']} / test={agr['dominios_test']})")
+        for clase in m["clases"]:
+            r = agr["reporte"].get(clase, {})
+            if r:
+                print(f"    {clase:<12} precision={r['precision']:.2f} recall={r['recall']:.2f} f1={r['f1-score']:.2f} n={int(r['support'])}")
+        print(f"\n  Matriz de confusión (filas=real, columnas=predicho): {m['clases']}")
+        for nombre, fila in zip(m["clases"], agr["matriz"]):
+            print(f"    {nombre:<12} {fila}")
+
+        diferencia = ale["accuracy"] - agr["accuracy"]
+        print(f"\n  Brecha aleatorio - agrupado: {diferencia:+.3f}")
+        print("  (brecha grande = el modelo se apoya en el medio; brecha pequeña = generaliza)")
+    else:
+        print("\n  (sin columna de dominio: no se pudo evaluar con partición agrupada)")
+
+    print("\n--- Importancia de variables ---")
+    for nombre, valor in list(m["importancias"].items())[:10]:
+        barra = "#" * int(valor * 100)
+        print(f"  {nombre:<26} {valor:.3f}  {barra}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Random Forest para el veredicto del IVR.")
     ap.add_argument("--entrenar", metavar="CSV", help="CSV etiquetado (características + veredicto) para entrenar.")
@@ -137,9 +265,20 @@ def main() -> int:
 
     if args.entrenar:
         df = pd.read_csv(args.entrenar)
+
+        # --- Evaluación honesta (aleatoria vs agrupada por dominio) ---
+        print(f"\n=== EVALUACION: {len(df)} filas ===")
+        print(f"clases: {dict(df['veredicto'].value_counts())}")
+        if COLUMNA_DOMINIO in df.columns:
+            print(f"dominios: {df[COLUMNA_DOMINIO].nunique()}")
+        print()
+
+        metricas = evaluar(df)
+        _imprimir_evaluacion(metricas)
+
+        # --- Entrenamiento final con TODOS los datos ---
+        print("\n=== Entrenamiento final (todos los datos) ===")
         clf, le = entrena(df)
-        cv = cross_val_score(clf, df[NOMBRES_CARACTERISTICAS], le.transform(df["veredicto"]) if le else df["veredicto"], cv=5)
-        print(f"Cross-val (5 folds) exactitud media: {cv.mean():.3f} ± {cv.std():.3f}")
         guardar(clf, le, args.salida)
         return 0
 

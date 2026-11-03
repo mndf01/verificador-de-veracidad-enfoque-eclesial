@@ -575,6 +575,28 @@ porque las de `no_definido` están fuera del corpus y distorsionarían el corte.
 El CSV incluye además `categoria_medio` (afin/critica/neutral) y `dominio` como
 columnas de **análisis** — nunca como features del modelo.
 
+#### Evaluación: dos particiones (clave metodológica)
+
+`verificador entrenar` reporta **dos** particiones, no una:
+
+| Partición | Qué mide |
+|---|---|
+| **Aleatoria** (`train_test_split` estratificado) | El mismo medio puede estar en train y en test. Si el modelo se apoya en el medio, aquí infla la exactitud |
+| **Agrupada** (`GroupShuffleSplit` por `dominio`) | Los dominios del test **no** aparecen en train. Refleja el uso real: un medio nuevo |
+
+**El dominio nunca entra como feature** (sería *data leakage*): solo se usa para agrupar
+en la evaluación. La diferencia entre ambas exactitudes cuantifica cuánto del rendimiento
+es memorización del medio y cuánto generalización de contenido.
+
+Resultado con 494 noticias (87 dominios):
+
+| Partición | Exactitud |
+|---|:---:|
+| Aleatoria | 0.774 |
+| **Agrupada por dominio** | **0.865** |
+
+La partición agrupada da **mejor** exactitud: el modelo aprende del contenido, no del medio.
+
 Predecir desde consola (ya con el modelo guardado):
 
 ```bash

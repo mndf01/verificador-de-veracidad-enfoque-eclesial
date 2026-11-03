@@ -410,11 +410,21 @@ def _cmd_entrenar(args: argparse.Namespace) -> int:
         return 1
     try:
         import pandas as pd
-        from src.modelo.rf import entrena, guardar
+        from src.modelo.rf import _imprimir_evaluacion, entrena, evaluar, guardar
     except Exception as e:
         print(f"✖ No se pudo cargar el módulo de entrenamiento ({type(e).__name__}: {e}).", file=sys.stderr)
         return 1
+
     df = pd.read_csv(args.dataset)
+    print(f"\n=== DATASET: {len(df)} filas ===")
+    print(f"clases: {dict(df['veredicto'].value_counts())}")
+
+    # Evaluación honesta: aleatoria vs agrupada por dominio.
+    print()
+    metricas = evaluar(df)
+    _imprimir_evaluacion(metricas)
+
+    print("\n=== Entrenamiento final (todos los datos) ===")
     clf, le = entrena(df)
     guardar(clf, le, args.salida)
     print(f"\n✓ Modelo Random Forest entrenado y guardado en {args.salida}")

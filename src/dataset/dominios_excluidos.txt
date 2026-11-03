@@ -20,8 +20,10 @@ uscatholic.org
 # --- critica ---
 nytimes.com
 proceso.com.mx
+opendemocracy.net
 
 # --- neutral ---
+agenciasinc.es
 hipertextual.com
 naukas.com
 religionnews.com

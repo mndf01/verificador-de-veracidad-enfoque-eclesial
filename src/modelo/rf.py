@@ -46,6 +46,26 @@ NOMBRES_CARACTERISTICAS = [
     "terminos_compartidos_max", "autoridad_max",
 ]
 
+# --- Ablación para calibrar los pesos del IVR -----------------------------------------
+# Las 4 columnas `ivr_*` son combinaciones lineales de SB, L, SO y J con los pesos
+# ACTUALES del IVR. Incluirlas al medir la importancia de las señales introduce
+# circularidad: la importancia de `ivr_max` ya está teñida por los pesos vigentes.
+# Para calibrar se excluyen y se usan solo las señales PURAS.
+COLUMNAS_IVR_DERIVADAS = ["ivr_max", "ivr_medio", "ivr_min", "ivr_brecha"]
+
+CARACTERISTICAS_SIN_IVR = [
+    nombre for nombre in NOMBRES_CARACTERISTICAS if nombre not in COLUMNAS_IVR_DERIVADAS
+]
+
+# Familias de variables: agrupan las features que provienen de una misma señal del IVR.
+# Sirven para agregar importancias y proponer pesos.
+FAMILIAS_SENALES: dict[str, list[str]] = {
+    "sb": ["sb_max", "sb_medio", "sb_min", "sb_brecha"],
+    "literal": ["literal_max", "literal_medio"],
+    "ontologico": ["ontologico_max", "so_disponible"],
+    "autoridad": ["autoridad_max"],
+}
+
 # Clases del veredicto (similitud con el corpus, no verdad absoluta).
 CLASES_VEREDICTO = ["proximo", "distante", "no_definido"]
 

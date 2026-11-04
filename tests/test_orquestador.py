@@ -68,8 +68,8 @@ def _modelo_fake():
 
 
 def _pred_fake(clf, le, x_row):
-    return {"clase": "consistente", "probabilidad": 0.91,
-            "probabilidades": {"consistente": 0.91, "inconsistente": 0.05, "no_verificable": 0.04}}
+    return {"clase": "proximo", "probabilidad": 0.91,
+            "probabilidades": {"proximo": 0.91, "distante": 0.05, "no_definido": 0.04}}
 
 
 class TestEvaluarNoticia(unittest.TestCase):
@@ -87,15 +87,16 @@ class TestEvaluarNoticia(unittest.TestCase):
             predecir=_pred_fake,
         )
         self.assertTrue(res.ok)
-        self.assertEqual(res.veredicto, "consistente")
+        self.assertEqual(res.veredicto, "proximo")
         self.assertAlmostEqual(res.probabilidad, 0.91)
         self.assertEqual(res.informe_ivr["n_evidencias"], 1)
 
     def test_deriva_premisa_del_titular(self):
-        """Cuando no hay premisa, se usa el titular extraído (flujo automatizado)."""
+        """Con premisa_modo='titulo', se usa el titular extraído como premisa."""
         res = orquestador.evaluar_noticia(
             url="https://ejemplo.com/noticia",
             premisa=None,
+            premisa_modo="titulo",
             extraer_contenido=lambda url: "texto",
             extraer_titular=lambda url: "El papa se reúne con obispos",
             calcular_ivr=_informe_fake,
@@ -106,6 +107,26 @@ class TestEvaluarNoticia(unittest.TestCase):
         self.assertTrue(res.ok)
         self.assertEqual(res.premisa, "El papa se reúne con obispos")
         self.assertEqual(res.titular_sugerido, "El papa se reúne con obispos")
+
+    def test_por_defecto_usa_el_cuerpo_completo(self):
+        """Por defecto (premisa_modo='cuerpo') la premisa es el texto completo.
+
+        Es la coherencia con el entrenamiento: el dataset se construye con ventanas
+        del cuerpo de la noticia, no con el titular.
+        """
+        res = orquestador.evaluar_noticia(
+            url="https://ejemplo.com/noticia",
+            premisa=None,
+            extraer_contenido=lambda url: "cuerpo completo de la noticia",
+            extraer_titular=lambda url: "Titular corto",
+            calcular_ivr=_informe_fake,
+            vector_caracteristicas=_vector_real,
+            cargar_modelo=lambda _ruta: _modelo_fake(),
+            predecir=_pred_fake,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(res.premisa, "cuerpo completo de la noticia")
+        self.assertEqual(res.titular_sugerido, "Titular corto")
 
     def test_falla_si_contenido_y_premisa_ausentes(self):
         """Sin texto extraído y sin premisa manual → error, ok=False."""
@@ -211,8 +232,8 @@ class TestEvaluarNoticia(unittest.TestCase):
 
 class TestVeredictoParaInterfaz(unittest.TestCase):
     def test_mapeo_español(self):
-        for clase, esperado in [("consistente", "consistente"), ("inconsistente", "inconsistente"),
-                                ("no_verificable", "no verificable")]:
+        for clase, esperado in [("proximo", "próximo"), ("distante", "distante"),
+                                ("no_definido", "no definido")]:
             res = orquestador.ResultadoEvaluacion(premisa="x", ok=True, veredicto=clase,
                                                   probabilidad=0.9)
             linea = orquestador.veredicto_para_interfaz(res)

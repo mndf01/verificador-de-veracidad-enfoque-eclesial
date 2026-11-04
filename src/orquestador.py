@@ -35,20 +35,26 @@ NIVEL_AUTORIDAD_LABEL = {
 }
 
 # Veredictos posibles del Random Forest (coinciden con rf.CLASES_VEREDICTO).
-VEREDICTOS = ("consistente", "inconsistente", "no_verificable")
+VEREDICTOS = ("proximo", "distante", "no_definido")
 
 # Etiquetas en español para la interfaz.
 VEREDICTO_ESP = {
-    "consistente": "consistente ✓",
-    "inconsistente": "inconsistente ✗",
-    "no_verificable": "no verificable (sin evidencia suficiente) ?",
+    "proximo": "próximo al corpus",
+    "distante": "distante del corpus",
+    "no_definido": "no definido (el corpus no cubre el tema)",
 }
 
 # Mapeo de sentencia de usuario según el veredicto (mensaje y tono).
+#
+# IMPORTANTE: el sistema mide SIMILITUD con el corpus, no verdad absoluta.
+# Por eso ninguna sentencia habla de "verdadero" ni "falso".
 _SENTENCIA = {
-    "consistente": "La afirmación es compatible con la doctrina/material consultado.",
-    "inconsistente": "La afirmación contradice o no se respalda en el material consultado.",
-    "no_verificable": "No hay evidencia suficiente en el corpus para pronunciarse.",
+    "proximo": "El contenido de la noticia está próximo al magisterio y la normativa del corpus: "
+               "trata los mismos temas y en términos compatibles.",
+    "distante": "La noticia pertenece al ámbito eclesial, pero el corpus no la respalda: "
+                "no se encontró correspondencia suficiente con el magisterio o la norma.",
+    "no_definido": "El corpus no cubre el tema de la noticia: no hay base de comparación "
+                   "para pronunciarse sobre ella.",
 }
 
 
@@ -60,7 +66,7 @@ class ResultadoEvaluacion:
     titular_sugerido: str | None = None
     url: str | None = None
     ok: bool = False
-    veredicto: str | None = None          # "consistente" | "inconsistente" | "no_verificable"
+    veredicto: str | None = None          # "proximo" | "distante" | "no_definido"
     probabilidad: float | None = None     # confianza del RF en la clase ganadora
     probabilidades: dict[str, float] = field(default_factory=dict)
     informe_ivr: dict = field(default_factory=dict)
@@ -69,9 +75,7 @@ class ResultadoEvaluacion:
 
 def _etiqueta_veredicto(clase: str) -> str:
     """Convierte el veredicto crudo del RF en etiqueta en español para la interfaz."""
-    if clase not in _SENTENCIA:
-        return clase
-    return VEREDICTO_ESP[clase]
+    return VEREDICTO_ESP.get(clase, clase)
 
 
 def _mensaje_veredicto(clase: str) -> str:
@@ -103,6 +107,7 @@ def evaluar_noticia(
     url: str,
     premisa: str | None = None,
     ruta_pdf: str | Path | None = None,
+    premisa_modo: str = "cuerpo",
     *,
     extraer_contenido: Callable[[str], str | None] | None = None,
     extraer_titular: Callable[[str], str | None] | None = None,
@@ -125,6 +130,10 @@ def evaluar_noticia(
         titular extraído de la URL como premisa candidata.
     :param ruta_pdf: opcional; PDF a cargar en sesión de expansión dinámica para
         ampliar el corpus de consulta (consultar_combinado).
+    :param premisa_modo: qué texto se envía al IVR.
+        * `"cuerpo"` (por defecto): el texto completo de la noticia. Es lo coherente
+          con el entrenamiento, donde las features salen de ventanas del cuerpo.
+        * `"titulo"`: solo el titular. Útil para comparaciones o URLs muy cortas.
     :param ...: funciones inyectables (para pruebas y para personalizar I/O).
     :return: ResultadoEvaluacion con todo lo necesario para presentar el informe.
     """
@@ -155,6 +164,15 @@ def evaluar_noticia(
             return resultado
         premisa = titular
         resultado.premisa = premisa
+
+    # 1b. Consistencia con el entrenamiento: el dataset se construye con ventanas del
+    #     CUERPO COMPLETO de la noticia, no con el titular. Si aquí evaluáramos solo el
+    #     titular, el RF recibiría features de otra distribución (un título de 10 palabras
+    #     frente a ventanas de 175) y las predicciones no serían comparables.
+    #     Por eso, cuando hay texto disponible, se usa el cuerpo completo como premisa.
+    if texto and premisa_modo == "cuerpo":
+        premisa = texto
+        resultado.premisa = texto
 
     # 2. Calcular el IVR sobre la premisa (corpus base o combinado con expansión dinámica).
     if calcular_ivr is None:

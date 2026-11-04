@@ -292,6 +292,13 @@ python -m src.cli evaluar "https://www.vaticannews.va/es/papa/news/2026-10/papa-
 
 Descargará la noticia con `trafilatura`, propondrá el titular como premisa y te pedirá confirmación antes de evaluar (`[Enter=usar, 'n'=escribir otra]`).
 
+> **Cómo se evalúa el texto.** El modelo se entrena con **ventanas del cuerpo completo**
+> de la noticia (175 palabras, solape 50), no con el titular. Por eso `evaluar` usa el
+> cuerpo por defecto: si evaluara solo el titular, las features serían de otra
+> distribución y la predicción no sería comparable con el entrenamiento.
+> El titular se muestra aparte como contexto (`premisa_modo="cuerpo"` es el valor por
+> defecto; `"titulo"` está disponible para comparaciones).
+
 **Ejemplo 2 (`evaluar`, modo no interactivo / automatizado):**
 
 ```bash

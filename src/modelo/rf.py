@@ -86,17 +86,29 @@ def _X_de_informe(informe: dict) -> list[float]:
     from src.vectorizacion.ivr import vector_caracteristicas
 
     caracteristicas = vector_caracteristicas(informe)
-    return [float(caracteristicas.get(nombre, 0.0)) for nombre in NOMBRES_CARACTERISTICAS]
+    # Solo las señales puras: el modelo no se entrena con las columnas ivr_*.
+    return [float(caracteristicas.get(nombre, 0.0)) for nombre in CARACTERISTICAS_SIN_IVR]
 
 
 def entrena(dataset: pd.DataFrame) -> tuple[RandomForestClassifier, LabelEncoder | None]:
-    """Entrena el RF con un CSV que tiene las características del IVR + columna `veredicto`.
+    """Entrena el RF con las características puras del IVR + columna `veredicto`.
 
-    :param dataset: DataFrame con las 16 columnas de NOMBRES_CARACTERISTICAS y
+    Usa `CARACTERISTICAS_SIN_IVR` (12 columnas): las señales SB, L, SO, J y los
+    conteos, pero NO las columnas `ivr_*`.
+
+    Por qué se excluyen las `ivr_*` (decisión D19):
+      * Son combinaciones lineales de las señales con los pesos del IVR, así que
+        aportan información redundante (la exactitud pasa de 0.701 a 0.703 al
+        quitarlas, es decir, no se pierde nada).
+      * Generan **circularidad**: el IVR se calcula de las mismas señales que luego
+        el modelo usa para aprender. Sin ellas, el modelo aprende de las señales
+        crudas y la fórmula del IVR queda como capa interpretativa independiente.
+
+    :param dataset: DataFrame con las 12 columnas de `CARACTERISTICAS_SIN_IVR` y
         una columna categórica `veredicto`.
     :return: (clf, le). le es None si el veredicto ya llega codificado.
     """
-    X = dataset[NOMBRES_CARACTERISTICAS].copy()
+    X = dataset[CARACTERISTICAS_SIN_IVR].copy()
     for col in X.columns:
         X[col] = pd.to_numeric(X[col], errors="coerce").fillna(0.0)
 
@@ -124,7 +136,7 @@ def predecir(clf: RandomForestClassifier, le: LabelEncoder | None, X_row: list[f
     """
     # Se envuelve en un DataFrame con los nombres de columna del entrenamiento
     # para que scikit-learn no emita warnings de "X does not have valid feature names".
-    X = pd.DataFrame([X_row], columns=NOMBRES_CARACTERISTICAS)
+    X = pd.DataFrame([X_row], columns=CARACTERISTICAS_SIN_IVR)
     probs = clf.predict_proba(X)[0]
     indice = int(clf.predict(X)[0])
     clase = le.inverse_transform([indice])[0] if le is not None else str(indice)
@@ -157,7 +169,7 @@ def evaluar(dataset: pd.DataFrame, columna_dominio: str = COLUMNA_DOMINIO) -> di
     from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
     from sklearn.model_selection import GroupShuffleSplit, train_test_split
 
-    X = dataset[NOMBRES_CARACTERISTICAS].copy()
+    X = dataset[CARACTERISTICAS_SIN_IVR].copy()
     for col in X.columns:
         X[col] = pd.to_numeric(X[col], errors="coerce").fillna(0.0)
 
@@ -202,13 +214,13 @@ def evaluar(dataset: pd.DataFrame, columna_dominio: str = COLUMNA_DOMINIO) -> di
             "matriz": confusion_matrix(y[te_idx], pred_g).tolist(),
         }
         resultado["importancias"] = dict(
-            sorted(zip(NOMBRES_CARACTERISTICAS, clf_g.feature_importances_),
+            sorted(zip(CARACTERISTICAS_SIN_IVR, clf_g.feature_importances_),
                    key=lambda kv: kv[1], reverse=True)
         )
     else:
         resultado["agrupado"] = None
         resultado["importancias"] = dict(
-            sorted(zip(NOMBRES_CARACTERISTICAS, clf_r.feature_importances_),
+            sorted(zip(CARACTERISTICAS_SIN_IVR, clf_r.feature_importances_),
                    key=lambda kv: kv[1], reverse=True)
         )
 
@@ -231,7 +243,7 @@ def guardar(clf, le, ruta: str | Path) -> None:
     import joblib
     ruta = Path(ruta)
     ruta.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump({"clf": clf, "le": le, "caracteristicas": NOMBRES_CARACTERISTICAS}, ruta)
+    joblib.dump({"clf": clf, "le": le, "caracteristicas": CARACTERISTICAS_SIN_IVR}, ruta)
     print(f"Modelo guardado en: {ruta}")
 
 

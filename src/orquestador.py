@@ -245,9 +245,13 @@ def evaluar_noticia(
     if modelo_fallido:
         return resultado
 
-    # 5. Construir el vector fila (orden estable de NOMBRES_CARACTERISTICAS).
-    from src.modelo.rf import NOMBRES_CARACTERISTICAS
-    x_row = [float(caracteristicas.get(nombre, 0.0)) for nombre in NOMBRES_CARACTERISTICAS]
+    # 5. Construir el vector fila. Se usan las características guardadas CON el
+    #    modelo (no una lista fija): así un modelo antiguo de 16 features y uno
+    #    nuevo de 12 funcionan con el mismo código, sin desalinear columnas.
+    nombres_modelo = modelo.get("caracteristicas") or []
+    if not nombres_modelo:
+        from src.modelo.rf import CARACTERISTICAS_SIN_IVR as nombres_modelo
+    x_row = [float(caracteristicas.get(nombre, 0.0)) for nombre in nombres_modelo]
 
     if predecir is None:
         from src.modelo.rf import predecir as predecir

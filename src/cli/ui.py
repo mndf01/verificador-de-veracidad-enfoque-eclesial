@@ -136,15 +136,17 @@ def mostrar_resultado(consola: Console, resultado, titulo_url: str | None = None
     color, icono, etiqueta = ESTILO_VEREDICTO.get(clase, ("white", "?", clase.upper()))
 
     # --- Panel de veredicto ---
+    # El título del panel NO repite la clase (ya aparece en el cuerpo): se usa un
+    # título neutro para evitar la lectura redundante "distante / DISTANTE DEL CORPUS".
     confianza = f"{resultado.probabilidad:.0%}" if resultado.probabilidad is not None else "—"
     cuerpo = Text()
     cuerpo.append(f"{icono} {etiqueta}", style=f"bold {color}")
-    cuerpo.append(f"   ·   confianza {confianza}\n\n", style="dim")
+    cuerpo.append(f"   ·   confianza en este veredicto: {confianza}\n\n", style="dim")
     cuerpo.append(_sentencia(clase), style="")
 
     consola.print(Panel(
         cuerpo,
-        title=f"[bold {color}]{clase}[/bold {color}]",
+        title="[bold]veredicto[/bold]",
         border_style=color,
         padding=(1, 2),
     ))
@@ -170,6 +172,15 @@ def mostrar_resultado(consola: Console, resultado, titulo_url: str | None = None
     if not informe or not informe.get("ok"):
         consola.print()
         return
+
+    # Distribución de probabilidad: muestra cuándo el modelo dudaba entre clases
+    # (caso habitual en la frontera distante <-> no_definido).
+    probabilidades = resultado.probabilidades or {}
+    if len(probabilidades) > 1:
+        ordenadas = sorted(probabilidades.items(), key=lambda kv: kv[1], reverse=True)
+        resumen = "   ".join(f"{c} {p:.0%}" for c, p in ordenadas)
+        consola.print(f"[dim]Distribución: {resumen}[/dim]")
+        consola.print()
 
     # --- Métricas agregadas ---
     consola.print()

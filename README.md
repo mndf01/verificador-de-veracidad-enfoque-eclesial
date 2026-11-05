@@ -613,6 +613,18 @@ columnas de **análisis** — nunca como features del modelo.
 
 #### Evaluación: dos particiones (clave metodológica)
 
+El modelo se entrena con **12 features** (las señales puras), no con las 16 del CSV:
+
+| Conjunto | Contenido | Uso |
+|---|---|---|
+| 16 features | señales + `ivr_max/medio/min/brecha` | CSV completo del dataset |
+| **12 features** | solo señales (`sb_*`, `literal_*`, `ontologico_*`, `autoridad_max`, conteos) | **entrenamiento y predicción** |
+
+Por qué se excluyen las `ivr_*`: son combinaciones lineales de las señales con los
+pesos del IVR (redundantes: 0.703 vs 0.701 de exactitud) y **generan circularidad** —
+el IVR se calcula de las mismas señales que el modelo aprende. Sin ellas, la fórmula
+del IVR queda como capa interpretativa independiente.
+
 `verificador entrenar` reporta **dos** particiones, no una:
 
 | Partición | Qué mide |

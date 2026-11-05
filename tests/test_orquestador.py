@@ -249,6 +249,35 @@ class TestEvaluarNoticia(unittest.TestCase):
         self.assertIn("expansion_dinamica", res.informe_ivr)
 
 
+class TestVectorDelModelo(unittest.TestCase):
+    """El vector que recibe el RF excluye las columnas `ivr_*` (decisión D19)."""
+
+    def test_x_de_informe_no_incluye_ivr(self):
+        from src.modelo.rf import CARACTERISTICAS_SIN_IVR, _X_de_informe
+
+        informe = {
+            "ok": True,
+            "n_evidencias": 2,
+            "conceptos_premisa": {"ID_BAUTISMO": "Sacramentos"},
+            "ivr_max": 0.8, "ivr_medio": 0.7, "ivr_min": 0.6,
+            "senales_max": {"sb": 0.9, "literal": 0.5, "ontologico": 0.6,
+                            "autoridad": 1.0, "terminos_compartidos": 0.4},
+            "evidencias": [
+                {"senales": {"sb": 0.9, "literal": 0.5, "ontologico": 0.6,
+                             "autoridad": 1.0, "terminos_compartidos": 0.4}},
+                {"senales": {"sb": 0.7, "literal": 0.3, "ontologico": 0.5,
+                             "autoridad": 1.0, "terminos_compartidos": 0.2}},
+            ],
+        }
+        vector = _X_de_informe(informe)
+        self.assertEqual(len(vector), len(CARACTERISTICAS_SIN_IVR))
+        self.assertEqual(len(vector), 12)
+        self.assertNotIn("ivr_max", CARACTERISTICAS_SIN_IVR)
+        # Las señales puras sí están.
+        for nombre in ("sb_max", "literal_medio", "ontologico_max", "autoridad_max"):
+            self.assertIn(nombre, CARACTERISTICAS_SIN_IVR)
+
+
 class TestVeredictoParaInterfaz(unittest.TestCase):
     def test_mapeo_español(self):
         for clase, esperado in [("proximo", "próximo"), ("distante", "distante"),

@@ -28,6 +28,10 @@ dependencies = [
     "scikit-learn>=1.4",
     "joblib>=1.4",   # guardar/cargar el modelo RF entrenado (src/modelo/rf.py)
     "snowballstemmer>=2.2",
+
+    # Interfaz de terminal (modo chat interactivo)
+    "rich>=13.0",            # renderizado: paneles, tablas, spinners, color
+    "prompt_toolkit>=3.0",   # entrada: prompt con historial y autocompletado
 ]
 
 [project.optional-dependencies]

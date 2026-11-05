@@ -72,7 +72,9 @@ verificador-de-veracidad-enfoque-eclesial/
 │   ├── orquestador.py       # Capa lógica que une todas las piezas (URL [+ PDF] → IVR → RF → veredicto)
 │   ├── cli/                 # Interfaz de terminal (compatible UTF-8 en Windows/Linux/macOS)
 │   │   ├── __init__.py      # API pública (main)
-│   │   ├── cli.py           # Subcomandos: evaluar, setup, dataset-generar, entrenar
+│   │   ├── cli.py           # Subcomandos: evaluar, setup, dataset-generar, entrenar, chat
+│   │   ├── chat.py          # Modo chat interactivo (bucle, comandos, estado de sesión)
+│   │   ├── ui.py            # Renderizado con Rich (paneles, tablas, barras)
 │   │   └── __main__.py      # lanzador (python -m src.cli)
 │   │
 │   ├── base_datos/          # Capa RAG (ChromaDB + embeddings)
@@ -283,6 +285,33 @@ verificador --help                  # tras `pip install -e .` (entry point)
 | `setup` | ETL completo + indexa el corpus en Chroma y verifica sincronización (`2965` docs) |
 | `dataset-generar` | Recorre noticias de `iglesia.db` con ventana deslizante (`175` palabras, solape `50`) y genera el CSV de entrenamiento. Etiqueta 3 clases: `proximo` / `distante` (por percentil del IVR) y `no_definido` (por construcción). Usa **caché en disco** y **excluye dominios bloqueados** |
 | `entrenar` | Entrena y persiste el Random Forest a `data/modelo_rf.joblib` |
+| `chat` | **Sesión interactiva** para probar el modelo conversacionalmente (Rich + prompt_toolkit) |
+
+### Modo chat (`verificador chat`)
+
+Interfaz conversacional para probar el modelo sin recordar comandos:
+
+```bash
+verificador chat
+verificador chat --pdf tests/ejemplos/decreto_diocesano_ejemplo.pdf
+```
+
+| Entrada | Acción |
+|---|---|
+| `https://...` | Evalúa la noticia de esa URL (descarga y analiza el cuerpo) |
+| `texto libre` | Lo evalúa como afirmación a contrastar (no descarga nada) |
+| `/pdf RUTA` | Carga un PDF en la sesión (expansión dinámica) |
+| `/pdf off` · `/historial` · `/modelo` · `/ayuda` · `/salir` | Comandos de sesión |
+
+La salida usa paneles coloreados por clase (`proximo` verde, `distante` ámbar,
+`no_definido` azul), una tabla de evidencias con barras de IVR y un spinner
+mientras evalúa. El prompt tiene historial y autocompletado de comandos.
+
+> La presentación vive en `src/cli/ui.py` (solo dibuja) y el bucle en
+> `src/cli/chat.py` (solo coordina). La lógica sigue en `src/orquestador.py`:
+> la interfaz no calcula nada.
+
+**Dependencias:** `rich>=13.0` (ya presente vía chromadb) y `prompt_toolkit>=3.0`.
 
 **Ejemplo 1 (`evaluar`, modo interactivo con una URL real):**
 

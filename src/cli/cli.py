@@ -82,6 +82,12 @@ def construir_parser() -> argparse.ArgumentParser:
     p_tr.add_argument("--salida", default="data/modelo_rf.joblib", help="Dónde guardar el modelo.")
     p_tr.set_defaults(func=_cmd_entrenar)
 
+    # ---- chat ----
+    p_chat = sub.add_parser("chat", help="Sesión interactiva para probar el modelo.")
+    p_chat.add_argument("--pdf", default=None, help="PDF a cargar en la sesión (expansión dinámica).")
+    p_chat.add_argument("--sin-color", action="store_true", help="Desactiva el color.")
+    p_chat.set_defaults(func=_cmd_chat)
+
     return ap
 
 
@@ -403,6 +409,12 @@ def _escribir_csv(ruta: str, filas: list[dict]) -> None:
         w = csv.DictWriter(f, fieldnames=columnas, extrasaction="ignore")
         w.writeheader()
         w.writerows(filas)
+
+
+def _cmd_chat(args: argparse.Namespace) -> int:
+    """Lanza el modo chat interactivo (Rich + prompt_toolkit)."""
+    from src.cli.chat import ejecutar_chat
+    return ejecutar_chat(ruta_pdf=args.pdf, sin_color=args.sin_color)
 
 
 def _cmd_entrenar(args: argparse.Namespace) -> int:

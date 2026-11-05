@@ -128,6 +128,25 @@ class TestEvaluarNoticia(unittest.TestCase):
         self.assertEqual(res.premisa, "cuerpo completo de la noticia")
         self.assertEqual(res.titular_sugerido, "Titular corto")
 
+    def test_premisa_explicita_no_se_sobreescribe_con_el_cuerpo(self):
+        """Si el usuario da una premisa explícita, `premisa_modo='cuerpo'` NO la pisa.
+
+        Regresión: antes, elegir `premisa_modo='cuerpo'` sustituía SIEMPRE la premisa
+        por el texto de la noticia. Eso rompía el caso de una afirmación concreta a
+        contrastar y hacía inútil `--pdf` (el PDF hablaba de un tema y la noticia de otro).
+        """
+        res = orquestador.evaluar_noticia(
+            url="https://ejemplo.com/noticia",
+            premisa="Afirmación concreta a verificar",
+            extraer_contenido=lambda url: "cuerpo completo de la noticia",
+            calcular_ivr=_informe_fake,
+            vector_caracteristicas=_vector_real,
+            cargar_modelo=lambda _ruta: _modelo_fake(),
+            predecir=_pred_fake,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(res.premisa, "Afirmación concreta a verificar")
+
     def test_falla_si_contenido_y_premisa_ausentes(self):
         """Sin texto extraído y sin premisa manual → error, ok=False."""
         res = orquestador.evaluar_noticia(

@@ -40,7 +40,10 @@ def construir_parser() -> argparse.ArgumentParser:
     # ---- evaluar ----
     p_eval = sub.add_parser("evaluar", help="Evalúa una noticia por URL hasta el veredicto.")
     p_eval.add_argument("url", help="URL absoluta de la noticia a evaluar.")
-    p_eval.add_argument("--pdf", default=None, help="PDF externo para expandir dinámicamente la consulta.")
+    p_eval.add_argument("--pdf", default=None,
+                        help="PDF externo para expandir dinámicamente la consulta. "
+                             "Rinde mejor con --premisa acotada: el cuerpo completo "
+                             "de una noticia diluye el embedding.")
     p_eval.add_argument("--premisa", default=None, help="Premisa explícita (si no, se usa el titular).")
     p_eval.add_argument("--no-interactivo", action="store_true",
                         help="No pregunta por pantalla: usa la premisa dada o el titular tal cual.")

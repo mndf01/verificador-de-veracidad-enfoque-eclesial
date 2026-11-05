@@ -139,6 +139,9 @@ def evaluar_noticia(
     """
     resultado = ResultadoEvaluacion(url=url, premisa=premisa or "")
 
+    # ¿La premisa la dio el usuario o hay que derivarla del titular?
+    premisa_derivada = premisa is None
+
     # 0. Función por defecto: extraer texto de la URL.
     if extraer_contenido is None:
         from src.web_extractor import extraer_contenido_url as extraer_contenido
@@ -169,8 +172,12 @@ def evaluar_noticia(
     #     CUERPO COMPLETO de la noticia, no con el titular. Si aquí evaluáramos solo el
     #     titular, el RF recibiría features de otra distribución (un título de 10 palabras
     #     frente a ventanas de 175) y las predicciones no serían comparables.
-    #     Por eso, cuando hay texto disponible, se usa el cuerpo completo como premisa.
-    if texto and premisa_modo == "cuerpo":
+    #
+    #     IMPORTANTE: la sustitución por el cuerpo SOLO se aplica cuando la premisa se
+    #     derivó del titular. Si quien llama pasó una premisa explícita, se respeta: es
+    #     una decisión deliberada del usuario (p. ej. una afirmación concreta que quiere
+    #     contrastar, o una consulta acotada al PDF cargado).
+    if texto and premisa_modo == "cuerpo" and premisa_derivada:
         premisa = texto
         resultado.premisa = texto
 

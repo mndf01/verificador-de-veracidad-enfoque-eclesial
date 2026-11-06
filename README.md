@@ -305,7 +305,12 @@ verificador chat --pdf tests/ejemplos/decreto_diocesano_ejemplo.pdf
 
 La salida usa paneles coloreados por clase (`proximo` verde, `distante` ámbar,
 `no_definido` azul), una tabla de evidencias con barras de IVR y un spinner
-mientras evalúa. El prompt tiene historial y autocompletado de comandos.
+mientras evalúa.
+
+> **Semántica de las clases.** `distante` significa *"el corpus no respalda esta
+> noticia"*, **no** *"la noticia es del ámbito eclesial pero falsa"*. Una noticia
+> política o deportiva puede caer en `distante` sin ser eclesial; el texto del
+> veredicto no presupone el tema de la noticia. El prompt tiene historial y autocompletado de comandos.
 
 > La presentación vive en `src/cli/ui.py` (solo dibuja) y el bucle en
 > `src/cli/chat.py` (solo coordina). La lógica sigue en `src/orquestador.py`:

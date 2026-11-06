@@ -48,12 +48,17 @@ VEREDICTO_ESP = {
 #
 # IMPORTANTE: el sistema mide SIMILITUD con el corpus, no verdad absoluta.
 # Por eso ninguna sentencia habla de "verdadero" ni "falso".
+#
+# `distante` deliberadamente NO afirma que la noticia sea del ámbito eclesial: solo
+# dice que el corpus no la respalda. Una noticia política puede caer aquí sin ser
+# eclesial, y el texto no debe presuponer lo contrario.
 _SENTENCIA = {
-    "proximo": "El contenido de la noticia está próximo al magisterio y la normativa del corpus: "
-               "trata los mismos temas y en términos compatibles.",
-    "distante": "La noticia pertenece al ámbito eclesial, pero el corpus no la respalda: "
-                "no se encontró correspondencia suficiente con el magisterio o la norma.",
-    "no_definido": "El corpus no cubre el tema de la noticia: no hay base de comparación "
+    "proximo": "El contenido trata los mismos temas que el corpus doctrinal y en términos "
+               "compatibles con el magisterio y la normativa.",
+    "distante": "El corpus no respalda esta noticia: no se encontró correspondencia suficiente "
+                "con el magisterio ni con la normativa. Puede ser un tema que el corpus trata "
+                "de otro modo, o un tema que no cubre.",
+    "no_definido": "El corpus no cubre el tema de esta noticia: no hay base de comparación "
                    "para pronunciarse sobre ella.",
 }
 

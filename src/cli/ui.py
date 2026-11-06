@@ -22,6 +22,26 @@ ESTILO_VEREDICTO = {
     "no_definido": ("blue", "?", "NO DEFINIDO"),
 }
 
+# Texto de cada veredicto. Redactado para NO afirmar que una noticia ajena al corpus
+# es "del ámbito eclesial": la clase `distante` solo dice que el corpus no la respalda,
+# sin presumir su tema. La distinción entre "no lo respalda" y "no lo cubre" es
+# distinta y la decide el modelo, no el texto.
+SENTENCIAS = {
+    "proximo": (
+        "El contenido trata los mismos temas que el corpus doctrinal y en términos "
+        "compatibles con el magisterio y la normativa."
+    ),
+    "distante": (
+        "El corpus no respalda esta noticia: no se encontró correspondencia suficiente "
+        "con el magisterio ni con la normativa. Puede ser un tema que el corpus trata "
+        "de otro modo, o un tema que no cubre."
+    ),
+    "no_definido": (
+        "El corpus no cubre el tema de esta noticia: no hay base de comparación para "
+        "pronunciarse sobre ella."
+    ),
+}
+
 NIVEL_AUTORIDAD_LABEL = {
     1.0: "Nivel 3 · universal (CIC)",
     0.85: "Nivel 3 · Constitución (Vaticano II)",
@@ -231,14 +251,7 @@ def mostrar_resultado(consola: Console, resultado, titulo_url: str | None = None
 
 
 def _sentencia(clase: str) -> str:
-    return {
-        "proximo": "El contenido está próximo al magisterio y la normativa del corpus: "
-                   "trata los mismos temas y en términos compatibles.",
-        "distante": "La noticia es del ámbito eclesial, pero el corpus no la respalda: "
-                    "no se encontró correspondencia suficiente.",
-        "no_definido": "El corpus no cubre el tema de esta noticia: no hay base de "
-                       "comparación para pronunciarse.",
-    }.get(clase, "Veredicto no reconocido.")
+    return SENTENCIAS.get(clase, "Veredicto no reconocido.")
 
 
 # ----------------------------------------------------------------------------------------

@@ -398,7 +398,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR  No se encontró el corpus en {args.corpus}. Genéralo primero con el ETL.", file=sys.stderr)
         return 1
     filas = buscar_candidatos(textos, _conocidos(raw), args.minimo, args.top)
-    print(f"{len(filas)} candidatos (aparecen en ≥ {args.minimo} fragmentos y no están en el tesauro). "
+    print(f"{len(filas)} candidatos (aparecen en >= {args.minimo} fragmentos y no están en el tesauro). "
           "Revisa cuáles son términos del dominio; habrá ruido.\n")
     for f in filas:
         print(f"{f['fragmentos']:>5}  {f['frase']:<36} …{f['ejemplo']}…")

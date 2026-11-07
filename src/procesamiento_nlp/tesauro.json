@@ -2,314 +2,1453 @@
   "conceptos": {
     "ID_PAPA": {
       "termino_canonico": "Romano Pontífice",
-      "variaciones_lexicas": ["Sumo Pontífice", "Papa", "Obispo de Roma", "Santo Padre", "Sucesor de Pedro"],
+      "variaciones_lexicas": [
+        "Sumo Pontífice",
+        "Papa",
+        "Obispo de Roma",
+        "Santo Padre",
+        "Sucesor de Pedro",
+        "Pontífice Romano",
+        "Obispo de la Iglesia de Roma",
+        "Vicario de Cristo",
+        "Cabeza del Colegio Episcopal"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_MATRIMONIO": {
       "termino_canonico": "Vínculo Matrimonial",
-      "variaciones_lexicas": ["Matrimonio", "Boda", "Casamiento", "Unión eclesiástica"],
+      "variaciones_lexicas": [
+        "Matrimonio",
+        "Boda",
+        "Casamiento",
+        "Unión eclesiástica",
+        "Sacramento del matrimonio",
+        "Alianza matrimonial",
+        "Matrimonio canónico",
+        "Matrimonio por la Iglesia"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_EXPULSION": {
       "termino_canonico": "Expulsión del estado clerical",
-      "variaciones_lexicas": ["Expulsado del sacerdocio", "Echado del sacerdocio", "Expulsión del sacerdocio", "Dimisión del estado clerical", "Reducción al estado laical"],
+      "variaciones_lexicas": [
+        "Expulsado del sacerdocio",
+        "Echado del sacerdocio",
+        "Expulsión del sacerdocio",
+        "Dimisión del estado clerical",
+        "Reducción al estado laical",
+        "Pérdida del estado clerical",
+        "Secularización forzada",
+        "Cura secularizado",
+        "Sacerdote expulsado"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_HUELGA": {
       "termino_canonico": "Huelga",
-      "variaciones_lexicas": ["Derecho de huelga", "Sindicato", "Paro laboral", "Protesta laboral"],
+      "variaciones_lexicas": [
+        "Derecho de huelga",
+        "Sindicato",
+        "Paro laboral",
+        "Protesta laboral",
+        "Derecho a la huelga",
+        "Huelga laboral",
+        "Libertad sindical",
+        "Asociación sindical"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_ABORTO": {
       "termino_canonico": "Aborto",
-      "variaciones_lexicas": ["Delito de aborto", "Interrupción del embarazo", "Pro-elección"],
+      "variaciones_lexicas": [
+        "Delito de aborto",
+        "Interrupción del embarazo",
+        "Pro-elección",
+        "Aborto provocado",
+        "Aborto procurado",
+        "Legalización del aborto",
+        "Despenalización del aborto"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_NULIDAD": {
       "termino_canonico": "Nulidad",
-      "variaciones_lexicas": ["Anulación matrimonial", "Anulación del matrimonio", "Matrimonio inválido", "Nulidad matrimonial"],
+      "variaciones_lexicas": [
+        "Anulación matrimonial",
+        "Anulación del matrimonio",
+        "Matrimonio inválido",
+        "Nulidad matrimonial",
+        "Declaración de nulidad",
+        "Proceso de nulidad matrimonial",
+        "Nulidad eclesiástica",
+        "Sentencia de nulidad"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_EUTANASIA": {
       "termino_canonico": "Eutanasia",
-      "variaciones_lexicas": ["Muerte digna", "Suicidio asistido", "Matar a un enfermo"],
+      "variaciones_lexicas": [
+        "Muerte digna",
+        "Suicidio asistido",
+        "Matar a un enfermo",
+        "Muerte asistida",
+        "Eutanasia activa",
+        "Encarnizamiento terapéutico",
+        "Cuidados paliativos"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_CELIBATO": {
       "termino_canonico": "Celibato",
-      "variaciones_lexicas": ["Cura soltero", "Prohibición de casarse", "Castidad sacerdotal"],
+      "variaciones_lexicas": [
+        "Cura soltero",
+        "Prohibición de casarse",
+        "Castidad sacerdotal",
+        "Celibato sacerdotal",
+        "Celibato eclesiástico",
+        "Continencia perfecta",
+        "Celibato opcional"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_EXCOMUNION": {
       "termino_canonico": "Excomunión",
-      "variaciones_lexicas": ["Expulsado de la iglesia", "Echado de la iglesia", "Desterrado"],
+      "variaciones_lexicas": [
+        "Expulsado de la iglesia",
+        "Echado de la iglesia",
+        "Desterrado",
+        "Pena de excomunión",
+        "Excomulgado de la Iglesia",
+        "Incurrir en excomunión",
+        "Excomunión mayor"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_SUSPENSION": {
       "termino_canonico": "Suspensión",
-      "variaciones_lexicas": ["Suspendido a divinis", "Suspensión a divinis", "Cura inhabilitado", "Sacerdote castigado", "Prohibición de dar misa", "Cura sancionado"],
+      "variaciones_lexicas": [
+        "Suspendido a divinis",
+        "Suspensión a divinis",
+        "Cura inhabilitado",
+        "Sacerdote castigado",
+        "Prohibición de dar misa",
+        "Cura sancionado",
+        "Pena de suspensión",
+        "Suspensión del ejercicio ministerial",
+        "Clérigo suspendido"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_APOSTASIA": {
       "termino_canonico": "Apostasía",
-      "variaciones_lexicas": ["Renuncia a la iglesia", "Abandono de la fe", "Salirse de la religión", "Apostatar"],
+      "variaciones_lexicas": [
+        "Renuncia a la iglesia",
+        "Abandono de la fe",
+        "Salirse de la religión",
+        "Apostatar",
+        "Delito de apostasía",
+        "Renunciar a la fe católica",
+        "Apóstata de la fe"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_CISMA": {
       "termino_canonico": "Cisma",
-      "variaciones_lexicas": ["División de la iglesia", "Separación del Vaticano", "Rebelión contra el Papa", "Iglesia paralela"],
+      "variaciones_lexicas": [
+        "División de la iglesia",
+        "Separación del Vaticano",
+        "Rebelión contra el Papa",
+        "Iglesia paralela",
+        "Delito de cisma",
+        "Ruptura con el Papa",
+        "Movimiento cismático",
+        "Ruptura de la unidad eclesial"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_HEREJIA": {
       "termino_canonico": "Herejía",
-      "variaciones_lexicas": ["Falsa doctrina", "Enseñanza prohibida", "Hereje", "Ir contra la fe"],
+      "variaciones_lexicas": [
+        "Falsa doctrina",
+        "Enseñanza prohibida",
+        "Hereje",
+        "Ir contra la fe",
+        "Delito de herejía",
+        "Doctrina herética",
+        "Negación de un dogma",
+        "Error doctrinal"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_LAICO": {
       "termino_canonico": "Laico",
-      "variaciones_lexicas": ["Seglar", "Feligrés común", "Creyente de a pie", "Católico no cura"],
+      "variaciones_lexicas": [
+        "Seglar",
+        "Feligrés común",
+        "Creyente de a pie",
+        "Católico no cura",
+        "Fieles seglares",
+        "Laicado católico",
+        "Cristianos laicos",
+        "Estado laical"
+      ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_ECUMENISMO": {
       "termino_canonico": "Ecumenismo",
-      "variaciones_lexicas": ["Unión de iglesias", "Unidad de los cristianos", "Hermanos separados", "Iglesias protestantes", "Iglesia ortodoxa"],
+      "variaciones_lexicas": [
+        "Unión de iglesias",
+        "Unidad de los cristianos",
+        "Hermanos separados",
+        "Iglesias protestantes",
+        "Iglesia ortodoxa",
+        "Movimiento ecuménico",
+        "Diálogo ecuménico",
+        "Consejo Mundial de Iglesias",
+        "Semana de Oración por la Unidad"
+      ],
       "categoria": "Relaciones Internacionales y Ecumenismo"
     },
-
     "ID_RELIGIONES_NO_CRISTIANAS": {
       "termino_canonico": "Religiones no cristianas",
-      "variaciones_lexicas": ["Diálogo interreligioso", "Reunión con otras religiones", "Apertura a otros credos", "Musulmanes", "Judíos", "Judaísmo", "Islam"],
+      "variaciones_lexicas": [
+        "Diálogo interreligioso",
+        "Reunión con otras religiones",
+        "Apertura a otros credos",
+        "Musulmanes",
+        "Judíos",
+        "Judaísmo",
+        "Islam",
+        "Encuentro interreligioso",
+        "Fraternidad interreligiosa",
+        "Religiones monoteístas",
+        "Budismo e hinduismo"
+      ],
       "categoria": "Relaciones Internacionales y Ecumenismo"
     },
     "ID_LIBERTAD_RELIGIOSA": {
       "termino_canonico": "Libertad religiosa",
-      "variaciones_lexicas": ["Libertad de culto", "Persecución religiosa", "Libertad de conciencia", "Derecho a creer"],
+      "variaciones_lexicas": [
+        "Libertad de culto",
+        "Persecución religiosa",
+        "Libertad de conciencia",
+        "Derecho a creer",
+        "Derecho a la libertad religiosa",
+        "Intolerancia religiosa",
+        "Cristianos perseguidos",
+        "Ataques a templos"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_IGLESIA_ESTADO": {
       "termino_canonico": "Comunidad política",
-      "variaciones_lexicas": ["Relación Iglesia-Estado", "Separación Iglesia y Estado", "Estado laico", "Concordato", "Gobierno civil"],
+      "variaciones_lexicas": [
+        "Relación Iglesia-Estado",
+        "Separación Iglesia y Estado",
+        "Estado laico",
+        "Concordato",
+        "Gobierno civil",
+        "Acuerdos con la Santa Sede",
+        "Laicidad del Estado",
+        "Relaciones entre Iglesia y Estado",
+        "Autonomía del orden temporal"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_DESTINO_BIENES": {
       "termino_canonico": "Destino universal de los bienes",
-      "variaciones_lexicas": ["Propiedad privada", "Reparto de la riqueza", "Distribución de la riqueza", "Expropiación"],
+      "variaciones_lexicas": [
+        "Propiedad privada",
+        "Reparto de la riqueza",
+        "Distribución de la riqueza",
+        "Expropiación",
+        "Función social de la propiedad",
+        "Hipoteca social",
+        "Uso común de los bienes",
+        "Acaparamiento de tierras"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_SALARIO": {
       "termino_canonico": "Salario justo",
-      "variaciones_lexicas": ["Sueldo digno", "Salario mínimo", "Remuneración justa", "Explotación laboral"],
+      "variaciones_lexicas": [
+        "Sueldo digno",
+        "Salario mínimo",
+        "Remuneración justa",
+        "Explotación laboral",
+        "Justa remuneración",
+        "Salario familiar",
+        "Sueldo insuficiente",
+        "Precarización salarial"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_MIGRACION": {
       "termino_canonico": "Inmigrantes",
-      "variaciones_lexicas": ["Migrantes", "Refugiados", "Inmigración", "Emigrantes", "Desplazados"],
+      "variaciones_lexicas": [
+        "Migrantes",
+        "Refugiados",
+        "Inmigración",
+        "Emigrantes",
+        "Desplazados",
+        "Pastoral de la movilidad humana",
+        "Acogida de migrantes",
+        "Crisis migratoria",
+        "Fronteras y refugiados"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_MEDIO_AMBIENTE": {
       "termino_canonico": "Medio ambiente",
-      "variaciones_lexicas": ["Ecología", "Cambio climático", "Cuidado de la casa común", "Contaminación", "Crisis ecológica"],
+      "variaciones_lexicas": [
+        "Ecología",
+        "Cambio climático",
+        "Cuidado de la casa común",
+        "Contaminación",
+        "Crisis ecológica",
+        "Conversión ecológica",
+        "Ecología integral",
+        "Laudato si",
+        "Calentamiento global",
+        "Deforestación"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_PENA_MUERTE": {
       "termino_canonico": "Pena de muerte",
-      "variaciones_lexicas": ["Pena capital", "Condena a muerte", "Ejecución de presos"],
+      "variaciones_lexicas": [
+        "Pena capital",
+        "Condena a muerte",
+        "Ejecución de presos",
+        "Abolición de la pena de muerte",
+        "Inadmisibilidad de la pena capital",
+        "Cadena perpetua"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_GUERRA": {
       "termino_canonico": "Guerra",
-      "variaciones_lexicas": ["Conflicto armado", "Guerra justa", "Carrera de armamentos", "Legítima defensa", "Terrorismo"],
+      "variaciones_lexicas": [
+        "Conflicto armado",
+        "Guerra justa",
+        "Carrera de armamentos",
+        "Legítima defensa",
+        "Terrorismo",
+        "Alto al fuego",
+        "Conflicto bélico",
+        "Invasión militar",
+        "Víctimas de la guerra"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_ANTICONCEPCION": {
       "termino_canonico": "Paternidad responsable",
-      "variaciones_lexicas": ["Anticonceptivos", "Anticoncepción", "Control de la natalidad", "Planificación familiar", "Métodos naturales"],
+      "variaciones_lexicas": [
+        "Anticonceptivos",
+        "Anticoncepción",
+        "Control de la natalidad",
+        "Planificación familiar",
+        "Métodos naturales",
+        "Regulación de la natalidad",
+        "Humanae vitae",
+        "Apertura a la vida",
+        "Píldora anticonceptiva"
+      ],
       "categoria": "Doctrina Social y Política"
     },
-
     "ID_OBISPO_DIOCESANO": {
       "termino_canonico": "Obispo diocesano",
-      "variaciones_lexicas": ["Monseñor", "Prelado", "Jefe de la diócesis", "Obispo de la diócesis", "Obispo"],
+      "variaciones_lexicas": [
+        "Monseñor",
+        "Prelado",
+        "Jefe de la diócesis",
+        "Obispo de la diócesis",
+        "Obispo",
+        "Pastor de la diócesis",
+        "Ordinario del lugar",
+        "Nombramiento episcopal",
+        "Gobierno de la diócesis"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_PARROCO": {
       "termino_canonico": "Párroco",
-      "variaciones_lexicas": ["Cura párroco", "Sacerdote de la parroquia", "Encargado de la parroquia", "Cura del pueblo", "Sacerdote"],
+      "variaciones_lexicas": [
+        "Cura párroco",
+        "Sacerdote de la parroquia",
+        "Encargado de la parroquia",
+        "Cura del pueblo",
+        "Sacerdote",
+        "Pastor propio de la parroquia",
+        "Vicario parroquial",
+        "Administrador parroquial",
+        "Sacerdote parroquial"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CONFERENCIA_EPISCOPAL": {
       "termino_canonico": "Conferencia Episcopal",
-      "variaciones_lexicas": ["Episcopado", "Asamblea de obispos", "Obispos del país"],
+      "variaciones_lexicas": [
+        "Episcopado",
+        "Asamblea de obispos",
+        "Obispos del país",
+        "Plenaria de obispos",
+        "Episcopado nacional",
+        "Presidente de la Conferencia Episcopal",
+        "Secretariado episcopal"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CONCILIO": {
       "termino_canonico": "Concilio Ecuménico",
-      "variaciones_lexicas": ["Vaticano II", "Concilio Vaticano", "Reunión de todos los obispos"],
+      "variaciones_lexicas": [
+        "Vaticano II",
+        "Concilio Vaticano",
+        "Reunión de todos los obispos",
+        "Padres conciliares",
+        "Decreto conciliar",
+        "Constitución conciliar",
+        "Concilio general"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_SEDE_VACANTE": {
       "termino_canonico": "Sede vacante",
-      "variaciones_lexicas": ["Cónclave", "Elección del Papa", "Renuncia del Papa", "Muerte del Papa"],
+      "variaciones_lexicas": [
+        "Cónclave",
+        "Elección del Papa",
+        "Renuncia del Papa",
+        "Muerte del Papa",
+        "Sede apostólica vacante",
+        "Fallecimiento del Papa",
+        "Abdicación papal",
+        "Camarlengo"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
-
     "ID_ORDEN_SAGRADO": {
       "termino_canonico": "Orden sagrado",
-      "variaciones_lexicas": ["Ordenación sacerdotal", "Ordenar sacerdote", "Ordenación de mujeres", "Sacerdocio femenino", "Diaconado"],
+      "variaciones_lexicas": [
+        "Ordenación sacerdotal",
+        "Ordenar sacerdote",
+        "Ordenación de mujeres",
+        "Sacerdocio femenino",
+        "Diaconado",
+        "Sacramento del orden",
+        "Ordenación episcopal",
+        "Ordenación diaconal",
+        "Diácono permanente",
+        "Orden del presbiterado"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_BAUTISMO": {
       "termino_canonico": "Bautismo",
-      "variaciones_lexicas": ["Bautizo", "Bautizar", "Partida de bautismo", "Fe de bautismo"],
+      "variaciones_lexicas": [
+        "Bautizo",
+        "Bautizar",
+        "Partida de bautismo",
+        "Fe de bautismo",
+        "Sacramento del bautismo",
+        "Agua bautismal",
+        "Pila bautismal",
+        "Bautismo de niños",
+        "Bautismo de adultos"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_EUCARISTIA": {
       "termino_canonico": "Santísima Eucaristía",
-      "variaciones_lexicas": ["Misa", "Santa Misa", "Comulgar", "Hostia consagrada", "Sacrificio eucarístico", "Eucaristía"],
+      "variaciones_lexicas": [
+        "Misa",
+        "Santa Misa",
+        "Comulgar",
+        "Hostia consagrada",
+        "Sacrificio eucarístico",
+        "Eucaristía",
+        "Celebración eucarística",
+        "Presencia real",
+        "Transubstanciación",
+        "Adoración eucarística",
+        "Santísimo Sacramento"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_PENITENCIA": {
       "termino_canonico": "Sacramento de la penitencia",
-      "variaciones_lexicas": ["Confesión sacramental", "Confesarse", "Absolución sacramental", "Acto de penitencia"],
+      "variaciones_lexicas": [
+        "Confesión sacramental",
+        "Confesarse",
+        "Absolución sacramental",
+        "Acto de penitencia",
+        "Sacramento de la reconciliación",
+        "Confesonario",
+        "Perdón de los pecados",
+        "Penitencia sacramental"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CONFIRMACION": {
       "termino_canonico": "Confirmación",
-      "variaciones_lexicas": ["Confirmarse", "Sacramento de la confirmación", "Crismación"],
+      "variaciones_lexicas": [
+        "Confirmarse",
+        "Sacramento de la confirmación",
+        "Crismación",
+        "Santo crisma",
+        "Don del Espíritu Santo",
+        "Confirmación de jóvenes",
+        "Obispo confirmante"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_UNCION": {
       "termino_canonico": "Unción de los enfermos",
-      "variaciones_lexicas": ["Extremaunción", "Santos óleos", "Últimos sacramentos"],
+      "variaciones_lexicas": [
+        "Extremaunción",
+        "Santos óleos",
+        "Últimos sacramentos",
+        "Sacramento de la unción",
+        "Óleo de los enfermos",
+        "Viático para enfermos",
+        "Asistencia espiritual a moribundos"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_DIVORCIO": {
       "termino_canonico": "Divorcio",
-      "variaciones_lexicas": ["Divorciados vueltos a casar", "Separación de los cónyuges", "Segundas nupcias", "Divorciado"],
+      "variaciones_lexicas": [
+        "Divorciados vueltos a casar",
+        "Separación de los cónyuges",
+        "Segundas nupcias",
+        "Divorciado",
+        "Ruptura conyugal",
+        "Divorcio civil",
+        "Fidelidad conyugal",
+        "Indisolubilidad del matrimonio"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
-
     "ID_ABUSO_MENORES": {
       "termino_canonico": "Delito contra el sexto mandamiento",
-      "variaciones_lexicas": ["Abuso sexual", "Abuso de menores", "Abusos sexuales", "Pederastia", "Abuso infantil"],
+      "variaciones_lexicas": [
+        "Abuso sexual",
+        "Abuso de menores",
+        "Abusos sexuales",
+        "Pederastia",
+        "Abuso infantil",
+        "Abuso sexual clerical",
+        "Protección de menores",
+        "Tolerancia cero en la Iglesia",
+        "Encubrimiento de abusos",
+        "Vos estis lux mundi"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_PROFANACION": {
       "termino_canonico": "Especies consagradas",
-      "variaciones_lexicas": ["Profanación de la hostia", "Sacrilegio", "Profanar la Eucaristía", "Profanación"],
+      "variaciones_lexicas": [
+        "Profanación de la hostia",
+        "Sacrilegio",
+        "Profanar la Eucaristía",
+        "Profanación",
+        "Robo de hostias consagradas",
+        "Profanación del sagrario",
+        "Sacrilegio eucarístico"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_SIMONIA": {
       "termino_canonico": "Simonía",
-      "variaciones_lexicas": ["Venta de sacramentos", "Cobrar por los sacramentos", "Comprar un cargo eclesiástico"],
+      "variaciones_lexicas": [
+        "Venta de sacramentos",
+        "Cobrar por los sacramentos",
+        "Comprar un cargo eclesiástico",
+        "Delito de simonía",
+        "Comercio de cosas sagradas",
+        "Tráfico de influencias eclesiástico"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_ENTREDICHO": {
       "termino_canonico": "Entredicho",
-      "variaciones_lexicas": ["Prohibición de recibir sacramentos", "Castigo eclesiástico"],
+      "variaciones_lexicas": [
+        "Prohibición de recibir sacramentos",
+        "Castigo eclesiástico",
+        "Pena de entredicho",
+        "Entredicho personal",
+        "Prohibición de celebrar sacramentos"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_PRESCRIPCION": {
       "termino_canonico": "Prescripción",
-      "variaciones_lexicas": ["Caso prescrito", "Delito prescrito", "Plazo de prescripción"],
+      "variaciones_lexicas": [
+        "Caso prescrito",
+        "Delito prescrito",
+        "Plazo de prescripción",
+        "Acción criminal prescrita",
+        "Derogación de la prescripción",
+        "Extinción de la acción penal"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
-
     "ID_VIDA_CONSAGRADA": {
       "termino_canonico": "Vida consagrada",
-      "variaciones_lexicas": ["Monja", "Fraile", "Congregación religiosa", "Votos religiosos", "Orden religiosa"],
+      "variaciones_lexicas": [
+        "Monja",
+        "Fraile",
+        "Congregación religiosa",
+        "Votos religiosos",
+        "Orden religiosa",
+        "Religiosos y religiosas",
+        "Vida monástica",
+        "Carisma fundacional",
+        "Hábito religioso"
+      ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_ASOCIACIONES_FIELES": {
       "termino_canonico": "Asociaciones de fieles",
-      "variaciones_lexicas": ["Movimiento católico", "Grupo parroquial", "Cofradía", "Hermandad religiosa"],
+      "variaciones_lexicas": [
+        "Movimiento católico",
+        "Grupo parroquial",
+        "Cofradía",
+        "Hermandad religiosa",
+        "Asociación pública de fieles",
+        "Asociación privada de fieles",
+        "Movimientos eclesiales",
+        "Nuevas comunidades"
+      ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_EDUCACION_CATOLICA": {
       "termino_canonico": "Educación católica",
-      "variaciones_lexicas": ["Colegio católico", "Escuela católica", "Universidad católica", "Clases de religión"],
+      "variaciones_lexicas": [
+        "Colegio católico",
+        "Escuela católica",
+        "Universidad católica",
+        "Clases de religión",
+        "Enseñanza católica",
+        "Ideario católico",
+        "Pastoral educativa",
+        "Facultad de teología"
+      ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
-
     "ID_SANTA_SEDE": {
       "termino_canonico": "Santa Sede",
-      "variaciones_lexicas": ["Sede Apostólica", "El Vaticano", "Curia Romana", "Dicasterio"],
+      "variaciones_lexicas": [
+        "Sede Apostólica",
+        "El Vaticano",
+        "Curia Romana",
+        "Dicasterio",
+        "Secretaría de Estado del Vaticano",
+        "Gobierno central de la Iglesia",
+        "Ciudad del Vaticano",
+        "Dicasterio para la Doctrina de la Fe"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CURIA_DIOCESANA": {
       "termino_canonico": "Vicario general",
-      "variaciones_lexicas": ["Administrador diocesano", "Curia diocesana", "Canciller diocesano", "Vicario judicial"],
+      "variaciones_lexicas": [
+        "Administrador diocesano",
+        "Curia diocesana",
+        "Canciller diocesano",
+        "Vicario judicial",
+        "Vicario episcopal",
+        "Ecónomo diocesano",
+        "Sede del obispado",
+        "Cancillería diocesana"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_DEFENSOR_VINCULO": {
       "termino_canonico": "Defensor del vínculo",
-      "variaciones_lexicas": ["Promotor de justicia", "Defensor del matrimonio", "Juez eclesiástico"],
+      "variaciones_lexicas": [
+        "Promotor de justicia",
+        "Defensor del matrimonio",
+        "Juez eclesiástico",
+        "Ministerio público eclesiástico",
+        "Notario eclesiástico",
+        "Auditor del tribunal"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_PENA_LATAE_SENTENTIAE": {
       "termino_canonico": "Latae sententiae",
-      "variaciones_lexicas": ["Excomunión automática", "Pena automática", "Ferendae sententiae", "Censura eclesiástica"],
+      "variaciones_lexicas": [
+        "Excomunión automática",
+        "Pena automática",
+        "Ferendae sententiae",
+        "Censura eclesiástica",
+        "Censura latae sententiae",
+        "Excomunión ipso facto",
+        "Pena canónica medicinal"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_BIENES_TEMPORALES": {
       "termino_canonico": "Bienes temporales",
-      "variaciones_lexicas": ["Patrimonio eclesiástico", "Inmatriculaciones", "Propiedades de la Iglesia", "Finanzas del Vaticano", "Diezmo"],
+      "variaciones_lexicas": [
+        "Patrimonio eclesiástico",
+        "Inmatriculaciones",
+        "Propiedades de la Iglesia",
+        "Finanzas del Vaticano",
+        "Diezmo",
+        "Bienes eclesiásticos",
+        "Enajenación de bienes",
+        "Fondo común diocesano",
+        "Patrimonio de la Iglesia"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_DISPENSA": {
       "termino_canonico": "Dispensa",
-      "variaciones_lexicas": ["Dispensa episcopal", "Dispensar del impedimento", "Dispensa canónica", "Causa justa para dispensar"],
+      "variaciones_lexicas": [
+        "Dispensa episcopal",
+        "Dispensar del impedimento",
+        "Dispensa canónica",
+        "Causa justa para dispensar",
+        "Dispensa pontificia",
+        "Relajación de la ley",
+        "Privilegio canónico",
+        "Gracia pontificia"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_CONSEJOS_EVANGELICOS": {
       "termino_canonico": "Consejos evangélicos",
-      "variaciones_lexicas": ["Voto de pobreza", "Voto de castidad", "Voto de obediencia", "Profesión religiosa"],
+      "variaciones_lexicas": [
+        "Voto de pobreza",
+        "Voto de castidad",
+        "Voto de obediencia",
+        "Profesión religiosa",
+        "Votos perpetuos",
+        "Votos temporales",
+        "Consagración religiosa",
+        "Pobreza evangélica"
+      ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
     "ID_PAREJAS_HOMOSEXUALES": {
       "termino_canonico": "Uniones homosexuales",
-      "variaciones_lexicas": ["Bendición de parejas gay", "Bendición a homosexuales", "Matrimonio igualitario en la Iglesia", "Parejas del mismo sexo", "Fiducia supplicans"],
+      "variaciones_lexicas": [
+        "Bendición de parejas gay",
+        "Bendición a homosexuales",
+        "Matrimonio igualitario en la Iglesia",
+        "Parejas del mismo sexo",
+        "Fiducia supplicans",
+        "Pastoral con personas LGTB",
+        "Uniones civiles del mismo sexo",
+        "Bendición pastoral no litúrgica"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_REPRODUCCION_ASISTIDA": {
       "termino_canonico": "Fecundación artificial",
-      "variaciones_lexicas": ["Fecundación in vitro", "Reproducción asistida", "Vientre de alquiler", "Gestación subrogada", "Embriones congelados"],
+      "variaciones_lexicas": [
+        "Fecundación in vitro",
+        "Reproducción asistida",
+        "Vientre de alquiler",
+        "Gestación subrogada",
+        "Embriones congelados",
+        "Clonación humana",
+        "Manipulación genética",
+        "Dignitas personae",
+        "Donum vitae"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_SECRETO_CONFESION": {
       "termino_canonico": "Sigilo sacramental",
-      "variaciones_lexicas": ["Secreto de confesión", "Inviolabilidad de la confesión", "Obligación de denunciar confesión", "Levantamiento del secreto de confesión"],
+      "variaciones_lexicas": [
+        "Secreto de confesión",
+        "Inviolabilidad de la confesión",
+        "Obligación de denunciar confesión",
+        "Levantamiento del secreto de confesión",
+        "Violación del sigilo sacramental",
+        "Secreto sacramental",
+        "Confesor y penitente"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_MISA_TRADICIONAL": {
       "termino_canonico": "Libros litúrgicos",
-      "variaciones_lexicas": ["Misa en latín", "Misa tridentina", "Vetus ordo", "Misa tradicional", "Traditionis custodes"],
+      "variaciones_lexicas": [
+        "Misa en latín",
+        "Misa tridentina",
+        "Vetus ordo",
+        "Misa tradicional",
+        "Traditionis custodes",
+        "Rito romano antiguo",
+        "Forma extraordinaria del rito",
+        "Summorum Pontificum",
+        "Misal de San Pío V"
+      ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CORRUPCION_FINANCIERA": {
       "termino_canonico": "Administración de los bienes",
-      "variaciones_lexicas": ["Malversación en el Vaticano", "Fraude financiero eclesiástico", "Lavado de dinero Vaticano", "Paraíso fiscal Vaticano"],
+      "variaciones_lexicas": [
+        "Malversación en el Vaticano",
+        "Fraude financiero eclesiástico",
+        "Lavado de dinero Vaticano",
+        "Paraíso fiscal Vaticano",
+        "Escándalo financiero en el Vaticano",
+        "Banco Vaticano",
+        "Instituto para las Obras de Religión",
+        "Transparencia económica"
+      ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_DIGNIDAD_HUMANA": {
       "termino_canonico": "Dignidad humana",
-      "variaciones_lexicas": ["Derechos humanos", "Violación de derechos humanos", "Tortura", "Trata de personas"],
+      "variaciones_lexicas": [
+        "Derechos humanos",
+        "Violación de derechos humanos",
+        "Tortura",
+        "Trata de personas",
+        "Dignidad de la persona humana",
+        "Imagen de Dios",
+        "Derecho a la vida",
+        "Inviolabilidad de la vida humana"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_BIEN_COMUN": {
       "termino_canonico": "Bien común",
-      "variaciones_lexicas": ["Interés general", "Solidaridad social", "Destino de la sociedad"],
+      "variaciones_lexicas": [
+        "Interés general",
+        "Solidaridad social",
+        "Destino de la sociedad",
+        "Búsqueda del bien común",
+        "Bienestar social",
+        "Orden social justo",
+        "Convivencia pacífica"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_MEDIOS_COMUNICACION": {
       "termino_canonico": "Medios de comunicación social",
-      "variaciones_lexicas": ["Prensa", "Redes sociales", "Desinformación", "Fake news en la Iglesia", "Libertad de expresión"],
+      "variaciones_lexicas": [
+        "Prensa",
+        "Redes sociales",
+        "Desinformación",
+        "Fake news en la Iglesia",
+        "Libertad de expresión",
+        "Comunicación eclesial",
+        "Ética en internet",
+        "Inteligencia artificial y ética",
+        "Periodismo religioso"
+      ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_TRIBUNALES_ECLESIASTICOS": {
       "termino_canonico": "Juicio contencioso",
-      "variaciones_lexicas": ["Tribunal eclesiástico", "Juicio canónico", "Proceso canónico", "Proceso judicial eclesiástico", "Tribunal de la Rota", "Tribunal diocesano"],
+      "variaciones_lexicas": [
+        "Tribunal eclesiástico",
+        "Juicio canónico",
+        "Proceso canónico",
+        "Proceso judicial eclesiástico",
+        "Tribunal de la Rota",
+        "Tribunal diocesano",
+        "Rota Romana",
+        "Justicia eclesiástica",
+        "Demanda canónica",
+        "Abogado rotal"
+      ],
       "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_IGLESIA_PARTICULAR": {
+      "termino_canonico": "Iglesia particular",
+      "variaciones_lexicas": [
+        "Iglesias particulares",
+        "Iglesia diocesana",
+        "Circunscripción eclesiástica",
+        "Diócesis católica",
+        "Arquidiócesis",
+        "Prelatura territorial",
+        "Vicariato apostólico"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_COLEGIO_CARDENALICIO": {
+      "termino_canonico": "Colegio Cardenalicio",
+      "variaciones_lexicas": [
+        "Cardenales electores",
+        "Consistorio de cardenales",
+        "Creación de cardenales",
+        "Purpurado",
+        "Cardenal decano",
+        "Príncipe de la Iglesia"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_OBISPO_AUXILIAR": {
+      "termino_canonico": "Obispo auxiliar",
+      "variaciones_lexicas": [
+        "Obispo coadjutor",
+        "Obispo emérito",
+        "Obispo titular",
+        "Sucesión episcopal",
+        "Renuncia episcopal por edad"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_METROPOLITA": {
+      "termino_canonico": "Provincia eclesiástica",
+      "variaciones_lexicas": [
+        "Arzobispo metropolitano",
+        "Sede metropolitana",
+        "Diócesis sufragánea",
+        "Imposición del palio",
+        "Palio arzobispal"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_SINODO_OBISPOS": {
+      "termino_canonico": "Sínodo de los Obispos",
+      "variaciones_lexicas": [
+        "Asamblea sinodal",
+        "Sínodo sobre la sinodalidad",
+        "Camino sinodal",
+        "Sínodo diocesano",
+        "Consulta sinodal"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_CONSEJO_PRESBITERAL": {
+      "termino_canonico": "Consejo presbiteral",
+      "variaciones_lexicas": [
+        "Colegio de consultores",
+        "Senado del obispo",
+        "Consultores diocesanos",
+        "Clero diocesano",
+        "Presbiterio diocesano"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_OFICIO_ECLESIASTICO": {
+      "termino_canonico": "Oficio eclesiástico",
+      "variaciones_lexicas": [
+        "Provisión canónica",
+        "Libre colación",
+        "Nombramiento eclesiástico",
+        "Toma de posesión canónica",
+        "Cargo pastoral"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_POTESTAD_REGIMEN": {
+      "termino_canonico": "Potestad de régimen",
+      "variaciones_lexicas": [
+        "Potestad ejecutiva",
+        "Jurisdicción eclesiástica",
+        "Potestad ordinaria",
+        "Potestad delegada",
+        "Gobierno pastoral"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_PERSONA_JURIDICA": {
+      "termino_canonico": "Persona jurídica",
+      "variaciones_lexicas": [
+        "Personas jurídicas públicas",
+        "Fundación pía",
+        "Entidad canónica",
+        "Estatutos canónicos",
+        "Personalidad jurídica canónica"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_INCARDINACION": {
+      "termino_canonico": "Incardinación",
+      "variaciones_lexicas": [
+        "Clérigo incardinado",
+        "Excardinación",
+        "Sacerdote extradiocesano",
+        "Clérigos vagos",
+        "Traslado de diócesis"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_PUEBLO_DIOS": {
+      "termino_canonico": "Pueblo de Dios",
+      "variaciones_lexicas": [
+        "Fieles cristianos",
+        "Bautizados en la Iglesia",
+        "Comunidad de creyentes",
+        "Sacerdocio común de los fieles",
+        "Sensus fidei"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_APOSTOLADO_LAICAL": {
+      "termino_canonico": "Fieles laicos",
+      "variaciones_lexicas": [
+        "Apostolado seglar",
+        "Misión de los laicos",
+        "Vocación laical",
+        "Compromiso laical",
+        "Laicos comprometidos",
+        "Ministerios laicales"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_INSTITUTO_RELIGIOSO": {
+      "termino_canonico": "Instituto religioso",
+      "variaciones_lexicas": [
+        "Sociedad de vida apostólica",
+        "Instituto secular",
+        "Superior mayor",
+        "Capítulo general",
+        "Constituciones religiosas",
+        "Comunidad religiosa"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_VIDA_CONTEMPLATIVA": {
+      "termino_canonico": "Casa religiosa",
+      "variaciones_lexicas": [
+        "Monasterio sui iuris",
+        "Clausura papal",
+        "Clausura monástica",
+        "Monjas de clausura",
+        "Vida contemplativa",
+        "Abadía católica"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_SEMINARIO": {
+      "termino_canonico": "Seminario mayor",
+      "variaciones_lexicas": [
+        "Seminario menor",
+        "Formación sacerdotal",
+        "Vocaciones sacerdotales",
+        "Rector del seminario",
+        "Futuros sacerdotes",
+        "Seminaristas diocesanos"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_CATEQUESIS": {
+      "termino_canonico": "Doctrina cristiana",
+      "variaciones_lexicas": [
+        "Formación catequética",
+        "Catecismo de la Iglesia Católica",
+        "Clases de catequesis",
+        "Catequistas parroquiales",
+        "Primera comunión y confirmación",
+        "Iniciación cristiana"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_EVANGELIZACION": {
+      "termino_canonico": "Evangelización",
+      "variaciones_lexicas": [
+        "Actividad misionera",
+        "Acción misionera",
+        "Nueva evangelización",
+        "Anuncio del Evangelio",
+        "Misiones populares",
+        "Misioneros católicos",
+        "Territorios de misión",
+        "Obras Misionales Pontificias"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_CONSEJO_PASTORAL": {
+      "termino_canonico": "Consejo pastoral",
+      "variaciones_lexicas": [
+        "Consejo parroquial",
+        "Consejo para asuntos económicos",
+        "Asamblea parroquial",
+        "Colaboración parroquial",
+        "Pastoral diocesana"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_PREDICACION": {
+      "termino_canonico": "Ministerio de la palabra",
+      "variaciones_lexicas": [
+        "Homilía dominical",
+        "Predicación de la palabra",
+        "Sermón del sacerdote",
+        "Predicar en misa",
+        "Facultad de predicar"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_DERECHOS_FIELES": {
+      "termino_canonico": "Obligaciones y derechos",
+      "variaciones_lexicas": [
+        "Derechos de los fieles",
+        "Deberes de los católicos",
+        "Igualdad de los fieles",
+        "Buena fama en la Iglesia",
+        "Derecho de petición eclesial"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_SOSTENIMIENTO_IGLESIA": {
+      "termino_canonico": "Necesidades de la Iglesia",
+      "variaciones_lexicas": [
+        "Colecta parroquial",
+        "Sostenimiento del clero",
+        "Ofrenda de los fieles",
+        "Limosna en la iglesia",
+        "Óbolo de San Pedro"
+      ],
+      "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
+    },
+    "ID_SAGRADA_LITURGIA": {
+      "termino_canonico": "Sagrada liturgia",
+      "variaciones_lexicas": [
+        "Culto divino",
+        "Celebración litúrgica",
+        "Año litúrgico",
+        "Tiempo litúrgico",
+        "Normas litúrgicas",
+        "Abusos litúrgicos"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_LITURGIA_HORAS": {
+      "termino_canonico": "Oficio divino",
+      "variaciones_lexicas": [
+        "Liturgia de las Horas",
+        "Rezo del breviario",
+        "Oración de la Iglesia",
+        "Laudes y vísperas"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_SAGRADA_COMUNION": {
+      "termino_canonico": "Sagrada comunión",
+      "variaciones_lexicas": [
+        "Recibir la comunión",
+        "Negar la comunión",
+        "Comunión en la mano",
+        "Comunión en la boca",
+        "Ministro extraordinario de la comunión",
+        "Estado de gracia para comulgar"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_IMPEDIMENTO_MATRIMONIAL": {
+      "termino_canonico": "Impedimento dirimente",
+      "variaciones_lexicas": [
+        "Impedimento matrimonial",
+        "Disparidad de cultos",
+        "Matrimonio mixto",
+        "Impedimento de consanguinidad",
+        "Impedimento de vínculo"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_CONSENTIMIENTO_MATRIMONIAL": {
+      "termino_canonico": "Consentimiento matrimonial",
+      "variaciones_lexicas": [
+        "Forma canónica",
+        "Vicio de consentimiento",
+        "Incapacidad consensual",
+        "Simulación del matrimonio",
+        "Promesa de matrimonio",
+        "Expediente matrimonial"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_PADRINOS": {
+      "termino_canonico": "Padrino",
+      "variaciones_lexicas": [
+        "Padrinos de bautismo",
+        "Padrino de confirmación",
+        "Requisitos para ser padrino",
+        "Madrina de bautismo"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_LUGARES_SAGRADOS": {
+      "termino_canonico": "Lugares sagrados",
+      "variaciones_lexicas": [
+        "Iglesia u oratorio",
+        "Templo parroquial",
+        "Santuario católico",
+        "Dedicación de una iglesia",
+        "Basílica menor",
+        "Capilla católica"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_EXEQUIAS": {
+      "termino_canonico": "Exequias eclesiásticas",
+      "variaciones_lexicas": [
+        "Funeral católico",
+        "Misa de cuerpo presente",
+        "Sepultura eclesiástica",
+        "Cremación de cadáveres",
+        "Cenizas de los difuntos",
+        "Cementerio católico"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_FIESTAS_PRECEPTO": {
+      "termino_canonico": "Fiestas de precepto",
+      "variaciones_lexicas": [
+        "Misa dominical",
+        "Precepto dominical",
+        "Día de precepto",
+        "Ayuno cuaresmal",
+        "Abstinencia de carne",
+        "Semana Santa"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_INVESTIGACION_PREVIA": {
+      "termino_canonico": "Juicio penal",
+      "variaciones_lexicas": [
+        "Investigación previa canónica",
+        "Proceso penal administrativo",
+        "Decreto penal extrajudicial",
+        "Denuncia canónica",
+        "Apertura de causa penal"
+      ],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_SENTENCIA_CANONICA": {
+      "termino_canonico": "Sentencia definitiva",
+      "variaciones_lexicas": [
+        "Cosa juzgada",
+        "Querella de nulidad",
+        "Fallo del tribunal eclesiástico",
+        "Ejecución de la sentencia",
+        "Sentencia interlocutoria"
+      ],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_TRIBUNAL_APELACION": {
+      "termino_canonico": "Tribunal de apelación",
+      "variaciones_lexicas": [
+        "Segunda instancia canónica",
+        "Signatura Apostólica",
+        "Recurso jerárquico",
+        "Apelación ante la Santa Sede",
+        "Tribunal colegial"
+      ],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_PRIVACION_OFICIO": {
+      "termino_canonico": "Privación del oficio",
+      "variaciones_lexicas": [
+        "Pena expiatoria",
+        "Remoción del párroco",
+        "Destitución del obispo",
+        "Prohibición de residir",
+        "Amonestación canónica",
+        "Reprensión canónica"
+      ],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_REMISION_PENA": {
+      "termino_canonico": "Fuero externo",
+      "variaciones_lexicas": [
+        "Fuero interno sacramental",
+        "Remisión de la pena",
+        "Levantamiento de la excomunión",
+        "Absolución de la censura",
+        "Penitenciaría Apostólica",
+        "Pena reservada a la Santa Sede"
+      ],
+      "categoria": "Derecho Penal Eclesiástico"
+    },
+    "ID_DOCTRINA_SOCIAL": {
+      "termino_canonico": "Doctrina social",
+      "variaciones_lexicas": [
+        "Doctrina Social de la Iglesia",
+        "Enseñanza social católica",
+        "Magisterio social",
+        "Encíclica social",
+        "Pastoral social"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_JUSTICIA_SOCIAL": {
+      "termino_canonico": "Justicia social",
+      "variaciones_lexicas": [
+        "Opción preferencial por los pobres",
+        "Lucha contra la pobreza",
+        "Desigualdad social",
+        "Exclusión social",
+        "Caridad política",
+        "Pastoral caritativa"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_TRABAJO_HUMANO": {
+      "termino_canonico": "Trabajo humano",
+      "variaciones_lexicas": [
+        "Dignidad del trabajo",
+        "Derechos de los trabajadores",
+        "Desempleo estructural",
+        "Trabajo decente",
+        "Trabajo infantil",
+        "Descanso laboral"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_SOCIEDAD_CIVIL": {
+      "termino_canonico": "Sociedad civil",
+      "variaciones_lexicas": [
+        "Autoridades públicas",
+        "Participación ciudadana",
+        "Objeción de conciencia",
+        "Sistema democrático",
+        "Estado de derecho",
+        "Corrupción política"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_FAMILIA_CRISTIANA": {
+      "termino_canonico": "Familia humana",
+      "variaciones_lexicas": [
+        "Familia cristiana",
+        "Iglesia doméstica",
+        "Defensa de la familia",
+        "Santuario de la vida",
+        "Derechos de la familia",
+        "Pastoral familiar"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_SUBSIDIARIEDAD": {
+      "termino_canonico": "Principio de subsidiaridad",
+      "variaciones_lexicas": [
+        "Principio de subsidiariedad",
+        "Principio de solidaridad",
+        "Desarrollo humano integral",
+        "Economía al servicio del hombre",
+        "Deuda externa de los países",
+        "Justicia distributiva"
+      ],
+      "categoria": "Doctrina Social y Política"
+    },
+    "ID_COMUNIDAD_INTERNACIONAL": {
+      "termino_canonico": "Comunidad internacional",
+      "variaciones_lexicas": [
+        "Organismos internacionales",
+        "Derecho internacional humanitario",
+        "Cooperación internacional",
+        "Paz mundial",
+        "Desarme nuclear",
+        "Fraternidad universal"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_LEGADOS_PONTIFICIOS": {
+      "termino_canonico": "Legados del Romano Pontífice",
+      "variaciones_lexicas": [
+        "Nuncio Apostólico",
+        "Nunciatura Apostólica",
+        "Diplomacia vaticana",
+        "Observador permanente de la Santa Sede",
+        "Relaciones diplomáticas del Vaticano",
+        "Delegado apostólico"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_IGLESIAS_ORIENTALES": {
+      "termino_canonico": "Iglesias orientales",
+      "variaciones_lexicas": [
+        "Iglesias católicas orientales",
+        "Rito oriental",
+        "Código de los Cánones de las Iglesias Orientales",
+        "Iglesia sui iuris",
+        "Tradición oriental"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_PATRIARCADO_ORIENTAL": {
+      "termino_canonico": "Fieles orientales",
+      "variaciones_lexicas": [
+        "Patriarcado oriental",
+        "Patriarcas orientales",
+        "Arzobispo mayor",
+        "Sínodo patriarcal",
+        "Eparquía oriental"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_PLENA_COMUNION": {
+      "termino_canonico": "Plena comunión",
+      "variaciones_lexicas": [
+        "Comunión eclesiástica",
+        "Comunión imperfecta",
+        "Comunicación en las cosas sagradas",
+        "Communicatio in sacris",
+        "Reconocimiento del bautismo"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_DERECHO_INTERNACIONAL": {
+      "termino_canonico": "Derecho internacional",
+      "variaciones_lexicas": [
+        "Tratados internacionales",
+        "Mediación papal",
+        "Arbitraje internacional",
+        "Solución pacífica de controversias",
+        "Santa Sede en la ONU"
+      ],
+      "categoria": "Relaciones Internacionales y Ecumenismo"
+    },
+    "ID_SAGRADA_ESCRITURA": {
+      "termino_canonico": "Sagrada Escritura",
+      "variaciones_lexicas": [
+        "Palabra de Dios",
+        "Antiguo Testamento",
+        "Nuevo Testamento",
+        "Sagrada Tradición",
+        "Traducción ecuménica de la Biblia",
+        "Inspiración bíblica"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_MAGISTERIO_IGLESIA": {
+      "termino_canonico": "Magisterio auténtico",
+      "variaciones_lexicas": [
+        "Magisterio de la Iglesia",
+        "Infalibilidad papal",
+        "Carta encíclica",
+        "Exhortación apostólica",
+        "Motu proprio",
+        "Constitución apostólica"
+      ],
+      "categoria": "Jerarquía y Gobierno Eclesiástico"
+    },
+    "ID_CULTO_SANTOS": {
+      "termino_canonico": "Veneración de los fieles",
+      "variaciones_lexicas": [
+        "Veneración de los santos",
+        "Imágenes sagradas",
+        "Canonización de un santo",
+        "Beatificación",
+        "Proceso de canonización",
+        "Sagradas reliquias",
+        "Devoción mariana",
+        "Santísima Virgen María"
+      ],
+      "categoria": "Sacramentos y Liturgia"
+    },
+    "ID_INDULGENCIAS": {
+      "termino_canonico": "Indulgencias",
+      "variaciones_lexicas": [
+        "Indulgencia plenaria",
+        "Año Santo Jubilar",
+        "Jubileo de la Iglesia",
+        "Puerta Santa",
+        "Peregrinación jubilar"
+      ],
+      "categoria": "Sacramentos y Liturgia"
     }
   }
 }

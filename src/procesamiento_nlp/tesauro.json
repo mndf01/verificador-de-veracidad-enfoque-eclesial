@@ -19,13 +19,13 @@
       "termino_canonico": "Vínculo Matrimonial",
       "variaciones_lexicas": [
         "Matrimonio",
-        "Boda",
-        "Casamiento",
         "Unión eclesiástica",
         "Sacramento del matrimonio",
         "Alianza matrimonial",
         "Matrimonio canónico",
-        "Matrimonio por la Iglesia"
+        "Matrimonio por la Iglesia",
+        "Boda",
+        "Casamiento"
       ],
       "categoria": "Sacramentos y Liturgia"
     },
@@ -45,36 +45,31 @@
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_HUELGA": {
-      "termino_canonico": "Huelga",
+      "termino_canonico": "Derecho de huelga",
       "variaciones_lexicas": [
-        "Derecho de huelga",
-        "Sindicato",
-        "Paro laboral",
-        "Protesta laboral",
         "Derecho a la huelga",
         "Huelga laboral",
         "Libertad sindical",
-        "Asociación sindical"
+        "Asociación sindical",
+        "Huelga"
       ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_ABORTO": {
-      "termino_canonico": "Aborto",
+      "termino_canonico": "Interrupción del embarazo",
       "variaciones_lexicas": [
-        "Delito de aborto",
-        "Interrupción del embarazo",
-        "Pro-elección",
         "Aborto provocado",
         "Aborto procurado",
         "Legalización del aborto",
-        "Despenalización del aborto"
+        "Despenalización del aborto",
+        "Delito de aborto",
+        "Aborto"
       ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_NULIDAD": {
-      "termino_canonico": "Nulidad",
+      "termino_canonico": "Anulación matrimonial",
       "variaciones_lexicas": [
-        "Anulación matrimonial",
         "Anulación del matrimonio",
         "Matrimonio inválido",
         "Nulidad matrimonial",
@@ -86,37 +81,34 @@
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_EUTANASIA": {
-      "termino_canonico": "Eutanasia",
+      "termino_canonico": "Eutanasia activa",
       "variaciones_lexicas": [
-        "Muerte digna",
         "Suicidio asistido",
         "Matar a un enfermo",
         "Muerte asistida",
-        "Eutanasia activa",
         "Encarnizamiento terapéutico",
-        "Cuidados paliativos"
+        "Cuidados paliativos",
+        "Muerte digna",
+        "Eutanasia"
       ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_CELIBATO": {
-      "termino_canonico": "Celibato",
+      "termino_canonico": "Celibato sacerdotal",
       "variaciones_lexicas": [
-        "Cura soltero",
         "Prohibición de casarse",
         "Castidad sacerdotal",
-        "Celibato sacerdotal",
         "Celibato eclesiástico",
         "Continencia perfecta",
-        "Celibato opcional"
+        "Celibato opcional",
+        "Cura soltero",
+        "Celibato"
       ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_EXCOMUNION": {
       "termino_canonico": "Excomunión",
       "variaciones_lexicas": [
-        "Expulsado de la iglesia",
-        "Echado de la iglesia",
-        "Desterrado",
         "Pena de excomunión",
         "Excomulgado de la Iglesia",
         "Incurrir en excomunión",
@@ -125,17 +117,13 @@
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_SUSPENSION": {
-      "termino_canonico": "Suspensión",
+      "termino_canonico": "Suspensión a divinis",
       "variaciones_lexicas": [
-        "Suspendido a divinis",
-        "Suspensión a divinis",
-        "Cura inhabilitado",
-        "Sacerdote castigado",
         "Prohibición de dar misa",
-        "Cura sancionado",
         "Pena de suspensión",
         "Suspensión del ejercicio ministerial",
-        "Clérigo suspendido"
+        "Clérigo suspendido",
+        "Suspendido a divinis"
       ],
       "categoria": "Derecho Penal Eclesiástico"
     },
@@ -143,12 +131,12 @@
       "termino_canonico": "Apostasía",
       "variaciones_lexicas": [
         "Renuncia a la iglesia",
-        "Abandono de la fe",
         "Salirse de la religión",
-        "Apostatar",
         "Delito de apostasía",
         "Renunciar a la fe católica",
-        "Apóstata de la fe"
+        "Apóstata de la fe",
+        "Apostatar",
+        "Abandono de la fe"
       ],
       "categoria": "Derecho Penal Eclesiástico"
     },
@@ -171,26 +159,26 @@
       "variaciones_lexicas": [
         "Falsa doctrina",
         "Enseñanza prohibida",
-        "Hereje",
         "Ir contra la fe",
         "Delito de herejía",
         "Doctrina herética",
         "Negación de un dogma",
-        "Error doctrinal"
+        "Error doctrinal",
+        "Hereje"
       ],
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_LAICO": {
-      "termino_canonico": "Laico",
+      "termino_canonico": "Laicado católico",
       "variaciones_lexicas": [
-        "Seglar",
-        "Feligrés común",
         "Creyente de a pie",
         "Católico no cura",
         "Fieles seglares",
-        "Laicado católico",
         "Cristianos laicos",
-        "Estado laical"
+        "Estado laical",
+        "Feligrés común",
+        "Laico",
+        "Seglar"
       ],
       "categoria": "Derechos y Obligaciones de los Fieles (Laicado)"
     },
@@ -246,7 +234,6 @@
         "Relación Iglesia-Estado",
         "Separación Iglesia y Estado",
         "Estado laico",
-        "Concordato",
         "Gobierno civil",
         "Acuerdos con la Santa Sede",
         "Laicidad del Estado",
@@ -258,12 +245,9 @@
     "ID_DESTINO_BIENES": {
       "termino_canonico": "Destino universal de los bienes",
       "variaciones_lexicas": [
-        "Propiedad privada",
         "Reparto de la riqueza",
         "Distribución de la riqueza",
-        "Expropiación",
         "Función social de la propiedad",
-        "Hipoteca social",
         "Uso común de los bienes",
         "Acaparamiento de tierras"
       ],
@@ -284,33 +268,21 @@
       "categoria": "Doctrina Social y Política"
     },
     "ID_MIGRACION": {
-      "termino_canonico": "Inmigrantes",
+      "termino_canonico": "Pastoral de la movilidad humana",
       "variaciones_lexicas": [
-        "Migrantes",
-        "Refugiados",
-        "Inmigración",
-        "Emigrantes",
-        "Desplazados",
-        "Pastoral de la movilidad humana",
         "Acogida de migrantes",
-        "Crisis migratoria",
-        "Fronteras y refugiados"
+        "Inmigrantes",
+        "Migrantes"
       ],
       "categoria": "Doctrina Social y Política"
     },
     "ID_MEDIO_AMBIENTE": {
       "termino_canonico": "Medio ambiente",
       "variaciones_lexicas": [
-        "Ecología",
-        "Cambio climático",
         "Cuidado de la casa común",
-        "Contaminación",
-        "Crisis ecológica",
         "Conversión ecológica",
         "Ecología integral",
-        "Laudato si",
-        "Calentamiento global",
-        "Deforestación"
+        "Laudato si"
       ],
       "categoria": "Doctrina Social y Política"
     },
@@ -327,16 +299,12 @@
       "categoria": "Doctrina Social y Política"
     },
     "ID_GUERRA": {
-      "termino_canonico": "Guerra",
+      "termino_canonico": "Guerra justa",
       "variaciones_lexicas": [
-        "Conflicto armado",
-        "Guerra justa",
         "Carrera de armamentos",
         "Legítima defensa",
-        "Terrorismo",
         "Alto al fuego",
         "Conflicto bélico",
-        "Invasión militar",
         "Víctimas de la guerra"
       ],
       "categoria": "Doctrina Social y Política"
@@ -344,7 +312,6 @@
     "ID_ANTICONCEPCION": {
       "termino_canonico": "Paternidad responsable",
       "variaciones_lexicas": [
-        "Anticonceptivos",
         "Anticoncepción",
         "Control de la natalidad",
         "Planificación familiar",
@@ -359,15 +326,15 @@
     "ID_OBISPO_DIOCESANO": {
       "termino_canonico": "Obispo diocesano",
       "variaciones_lexicas": [
-        "Monseñor",
-        "Prelado",
         "Jefe de la diócesis",
         "Obispo de la diócesis",
-        "Obispo",
         "Pastor de la diócesis",
         "Ordinario del lugar",
         "Nombramiento episcopal",
-        "Gobierno de la diócesis"
+        "Gobierno de la diócesis",
+        "Obispo",
+        "Monseñor",
+        "Prelado"
       ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
@@ -378,11 +345,11 @@
         "Sacerdote de la parroquia",
         "Encargado de la parroquia",
         "Cura del pueblo",
-        "Sacerdote",
         "Pastor propio de la parroquia",
         "Vicario parroquial",
         "Administrador parroquial",
-        "Sacerdote parroquial"
+        "Sacerdote parroquial",
+        "Sacerdote"
       ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
@@ -446,31 +413,31 @@
       "termino_canonico": "Bautismo",
       "variaciones_lexicas": [
         "Bautizo",
-        "Bautizar",
         "Partida de bautismo",
         "Fe de bautismo",
         "Sacramento del bautismo",
         "Agua bautismal",
         "Pila bautismal",
         "Bautismo de niños",
-        "Bautismo de adultos"
+        "Bautismo de adultos",
+        "Bautizar"
       ],
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_EUCARISTIA": {
       "termino_canonico": "Santísima Eucaristía",
       "variaciones_lexicas": [
-        "Misa",
         "Santa Misa",
-        "Comulgar",
         "Hostia consagrada",
         "Sacrificio eucarístico",
-        "Eucaristía",
         "Celebración eucarística",
         "Presencia real",
         "Transubstanciación",
         "Adoración eucarística",
-        "Santísimo Sacramento"
+        "Santísimo Sacramento",
+        "Misa",
+        "Eucaristía",
+        "Comulgar"
       ],
       "categoria": "Sacramentos y Liturgia"
     },
@@ -489,10 +456,8 @@
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_CONFIRMACION": {
-      "termino_canonico": "Confirmación",
+      "termino_canonico": "Sacramento de la confirmación",
       "variaciones_lexicas": [
-        "Confirmarse",
-        "Sacramento de la confirmación",
         "Crismación",
         "Santo crisma",
         "Don del Espíritu Santo",
@@ -515,16 +480,16 @@
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_DIVORCIO": {
-      "termino_canonico": "Divorcio",
+      "termino_canonico": "Indisolubilidad del matrimonio",
       "variaciones_lexicas": [
-        "Divorciados vueltos a casar",
         "Separación de los cónyuges",
         "Segundas nupcias",
         "Divorciado",
         "Ruptura conyugal",
         "Divorcio civil",
         "Fidelidad conyugal",
-        "Indisolubilidad del matrimonio"
+        "Divorciados vueltos a casar",
+        "Divorcio"
       ],
       "categoria": "Sacramentos y Liturgia"
     },
@@ -581,14 +546,10 @@
       "categoria": "Derecho Penal Eclesiástico"
     },
     "ID_PRESCRIPCION": {
-      "termino_canonico": "Prescripción",
+      "termino_canonico": "Extinción de la acción penal",
       "variaciones_lexicas": [
-        "Caso prescrito",
-        "Delito prescrito",
-        "Plazo de prescripción",
-        "Acción criminal prescrita",
         "Derogación de la prescripción",
-        "Extinción de la acción penal"
+        "Acción criminal prescrita"
       ],
       "categoria": "Derecho Penal Eclesiástico"
     },
@@ -704,16 +665,16 @@
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
     "ID_DISPENSA": {
-      "termino_canonico": "Dispensa",
+      "termino_canonico": "Dispensa canónica",
       "variaciones_lexicas": [
-        "Dispensa episcopal",
         "Dispensar del impedimento",
-        "Dispensa canónica",
         "Causa justa para dispensar",
         "Dispensa pontificia",
         "Relajación de la ley",
         "Privilegio canónico",
-        "Gracia pontificia"
+        "Gracia pontificia",
+        "Dispensa episcopal",
+        "Dispensa"
       ],
       "categoria": "Jerarquía y Gobierno Eclesiástico"
     },
@@ -805,9 +766,6 @@
     "ID_DIGNIDAD_HUMANA": {
       "termino_canonico": "Dignidad humana",
       "variaciones_lexicas": [
-        "Derechos humanos",
-        "Violación de derechos humanos",
-        "Tortura",
         "Trata de personas",
         "Dignidad de la persona humana",
         "Imagen de Dios",
@@ -832,11 +790,7 @@
     "ID_MEDIOS_COMUNICACION": {
       "termino_canonico": "Medios de comunicación social",
       "variaciones_lexicas": [
-        "Prensa",
-        "Redes sociales",
-        "Desinformación",
         "Fake news en la Iglesia",
-        "Libertad de expresión",
         "Comunicación eclesial",
         "Ética en internet",
         "Inteligencia artificial y ética",
@@ -1160,12 +1114,12 @@
       "categoria": "Sacramentos y Liturgia"
     },
     "ID_PADRINOS": {
-      "termino_canonico": "Padrino",
+      "termino_canonico": "Padrinos de bautismo",
       "variaciones_lexicas": [
-        "Padrinos de bautismo",
         "Padrino de confirmación",
         "Requisitos para ser padrino",
-        "Madrina de bautismo"
+        "Madrina de bautismo",
+        "Padrino"
       ],
       "categoria": "Sacramentos y Liturgia"
     },
@@ -1431,7 +1385,6 @@
         "Veneración de los santos",
         "Imágenes sagradas",
         "Canonización de un santo",
-        "Beatificación",
         "Proceso de canonización",
         "Sagradas reliquias",
         "Devoción mariana",

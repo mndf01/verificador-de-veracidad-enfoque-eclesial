@@ -29,7 +29,9 @@ Uso como función:
 from __future__ import annotations
 
 import logging
+import signal
 import sys
+from contextlib import contextmanager
 
 import trafilatura
 
@@ -40,6 +42,34 @@ log = logging.getLogger(__name__)
 # Si el HTML descargado supera este tamaño se devuelve None (el propio trafilatura
 # por defecto ya recorta ~2 MB; este es un corte extra por seguridad/claridad).
 _MAX_HTML_BYTES = 5_000_000
+
+# Timeout de descarga. `trafilatura.fetch_url` no expone timeout y puede quedarse
+# colgado indefinidamente si el servidor abre la conexión y no responde (visto en
+# producción: el proceso quedó 30 min bloqueado con CPU al 0 %).
+_TIMEOUT_DESCARGA = 30
+
+
+@contextmanager
+def _limite_tiempo(segundos: int):
+    """Aborta la operación si tarda más de `segundos` (SIGALRM, solo en el hilo principal).
+
+    En plataformas sin SIGALRM (Windows) o fuera del hilo principal, no hace nada:
+    la descarga seguirá sin límite, pero no se rompe nada.
+    """
+    if not hasattr(signal, "SIGALRM"):
+        yield
+        return
+
+    def _expirar(_signum, _frame):
+        raise TimeoutError(f"descarga superó {segundos} s")
+
+    anterior = signal.signal(signal.SIGALRM, _expirar)
+    signal.alarm(segundos)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, anterior)
 
 
 # ----------------------------------------------------------------------------------------
@@ -97,7 +127,11 @@ def extraer_contenido_url(url: str) -> str | None:
 
     log.info("Descargando %s ...", url)
     try:
-        descargado = trafilatura.fetch_url(url)
+        with _limite_tiempo(_TIMEOUT_DESCARGA):
+            descargado = trafilatura.fetch_url(url)
+    except TimeoutError:
+        log.warning("Timeout al descargar %s (más de %d s)", url, _TIMEOUT_DESCARGA)
+        return None
     except Exception as e:                 # trafilatura puede lanzar errores de red muy variados
         log.warning("Fallo de red al descargar %s: %s", url, e)
         return None
@@ -152,8 +186,9 @@ def extraer_metadata_url(url: str) -> dict:
     if not isinstance(url, str) or not url.strip():
         return {"titulo": "", "autor": "", "fecha": "", "idioma": ""}
     try:
-        descargado = trafilatura.fetch_url(url)
-    except Exception as e:
+        with _limite_tiempo(_TIMEOUT_DESCARGA):
+            descargado = trafilatura.fetch_url(url)
+    except (TimeoutError, Exception) as e:
         log.warning("Fallo de red en extraer_metadata_url(%s): %s", url, e)
         return {"titulo": "", "autor": "", "fecha": "", "idioma": ""}
     if not descargado:

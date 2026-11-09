@@ -296,16 +296,23 @@ verificador chat
 verificador chat --pdf tests/ejemplos/decreto_diocesano_ejemplo.pdf
 ```
 
-| Entrada | Acción |
-|---|---|
-| `https://...` | Evalúa la noticia de esa URL (descarga y analiza el cuerpo) |
-| `texto libre` | Lo evalúa como afirmación a contrastar (no descarga nada) |
+| Entrada | Acción | Fiabilidad |
+|---|---|---|
+| `https://...` | Evalúa la noticia de esa URL (descarga y analiza el cuerpo) | ✅ Alta |
+| `texto libre` | Lo evalúa como afirmación a contrastar (no descarga nada) | ⚠️ **Baja** (ver abajo) |
 | `/pdf RUTA` | Carga un PDF en la sesión (expansión dinámica) |
 | `/pdf off` · `/historial` · `/modelo` · `/ayuda` · `/salir` | Comandos de sesión |
 
 La salida usa paneles coloreados por clase (`proximo` verde, `distante` ámbar,
 `no_definido` azul), una tabla de evidencias con barras de IVR y un spinner
 mientras evalúa.
+
+> ⚠️ **Limitación conocida: premisas cortas.** El modelo se entrena con **ventanas de
+> 175 palabras del cuerpo** de las noticias, cuyos IVR van de 0,35 a 0,70. Una premisa
+> corta y doctrinal alcanza IVR ≈ 0,77 — un valor que el modelo **nunca vio** — y puede
+> clasificarse como `distante` aunque sea correcta. **Usa URLs** para resultados fiables;
+> si escribes texto libre, revisa la distribución de probabilidad (confianza ~50 % indica
+> duda del modelo).
 
 > **Semántica de las clases.** `distante` significa *"el corpus no respalda esta
 > noticia"*, **no** *"la noticia es del ámbito eclesial pero falsa"*. Una noticia

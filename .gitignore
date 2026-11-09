@@ -29,6 +29,9 @@ MANIFEST
 data/
 .idea/
 
+# macOS
+.DS_Store
+
 # Nexus-map (base de conocimientos de análisis de arquitectura, artefacto local)
 .nexus-map/
 

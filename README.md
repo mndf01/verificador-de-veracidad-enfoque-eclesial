@@ -283,7 +283,7 @@ verificador --help                  # tras `pip install -e .` (entry point)
 |---------|----------|
 | `evaluar URL` | URL → texto/titular → premisa → RAG (corpus base + `--pdf` opcional) → IVR → RF → informe + veredicto |
 | `setup` | ETL completo + indexa el corpus en Chroma y verifica sincronización (`2965` docs) |
-| `dataset-generar` | Recorre noticias de `iglesia.db` con ventana deslizante (`175` palabras, solape `50`) y genera el CSV de entrenamiento. Etiqueta 3 clases: `proximo` / `distante` (por percentil del IVR) y `no_definido` (por construcción). Usa **caché en disco** y **excluye dominios bloqueados** |
+| `dataset-generar` | Recorre noticias de `data/corpus_noticias/iglesia.db` (versionada) con ventana deslizante (`175` palabras, solape `50`) y genera el CSV de entrenamiento. Etiqueta 3 clases: `proximo` / `distante` (por percentil del IVR) y `no_definido` (por construcción). Usa **caché en disco** y **excluye dominios bloqueados** |
 | `entrenar` | Entrena y persiste el Random Forest a `data/modelo_rf.joblib` |
 | `chat` | **Sesión interactiva** para probar el modelo conversacionalmente (Rich + prompt_toolkit) |
 
@@ -571,14 +571,14 @@ Flujo:
 premisa ──► ivr.calcular_ivr() ──► informe ──► vector_caracteristicas() ──► RF ──► veredicto
 ```
 
-Generar el dataset desde `iglesia.db` y entrenar:
+Generar el dataset desde `data/corpus_noticias/iglesia.db` (versionada en el repo) y entrenar:
 
 ```bash
 # 1. Diagnóstico rápido sobre una muestra balanceada (sin escribir CSV)
-python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 30 --solo-diagnostico
+python -m src.cli dataset-generar --n 30 --solo-diagnostico
 
 # 2. Generar el CSV etiquetado (usa caché: re-ejecutar no re-descarga)
-python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 500 --salida data/etiquetado.csv
+python -m src.cli dataset-generar --n 500 --salida data/etiquetado.csv
 
 # 3. Entrenar y guardar el modelo Random Forest en disco
 python -m src.cli entrenar --dataset data/etiquetado.csv --salida data/modelo_rf.joblib
@@ -592,10 +592,10 @@ caché del IVR guarda señales, no el texto, así que sin este caché habría qu
 
 ```bash
 # La primera vez descarga y guarda el texto de cada noticia
-verificador dataset-generar --db ruta/a/iglesia.db --n 320
+verificador dataset-generar --n 320
 
 # Tras cambiar el tesauro: recalcula sin descargar (usa el texto cacheado)
-verificador dataset-generar --db ruta/a/iglesia.db --n 320 --recalcular
+verificador dataset-generar --n 320 --recalcular
 ```
 
 | Caché | Guarda | Se invalida al… |

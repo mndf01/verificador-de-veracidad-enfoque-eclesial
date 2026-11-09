@@ -58,8 +58,9 @@ def construir_parser() -> argparse.ArgumentParser:
 
     # ---- dataset-generar ----
     p_ds = sub.add_parser("dataset-generar", help="Genera un CSV de entrenamiento para el RF.")
-    p_ds.add_argument("--db", required=True,
-                      help="Ruta a iglesia.db (SQLite con tabla urls).")
+    p_ds.add_argument("--db", default=None,
+                      help="Ruta a iglesia.db (SQLite con tabla urls). Por defecto: "
+                           "data/corpus_noticias/iglesia.db (versionado en el repo).")
     p_ds.add_argument("--salida", default="data/etiquetado.csv", help="CSV de salida.")
     p_ds.add_argument("--n", type=int, default=30, help="Tamaño de la muestra (0 = todas).")
     p_ds.add_argument("--estrategia", choices=["construccion", "umbral"], default="construccion",
@@ -286,12 +287,19 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
     )
     from src.dataset.cache import CacheIVR
     from src.dataset.cache_textos import CacheTextos
-    from src.dataset.generador import CATEGORIA_FUERA_DE_TEMA, dominios_excluidos, filtrar_excluidos
+    from src.dataset.generador import (
+        CATEGORIA_FUERA_DE_TEMA,
+        RUTA_DB_POR_DEFECTO,
+        dominios_excluidos,
+        filtrar_excluidos,
+    )
 
+    ruta_db = args.db or RUTA_DB_POR_DEFECTO
     try:
-        urls = leer_urls(args.db)
+        urls = leer_urls(ruta_db)
     except FileNotFoundError as e:
         print(f"✖ {e}", file=sys.stderr)
+        print(f"   La base de noticias se versiona en {RUTA_DB_POR_DEFECTO}.", file=sys.stderr)
         return 1
 
     if not urls:

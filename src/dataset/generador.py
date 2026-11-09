@@ -56,6 +56,11 @@ CATEGORIA_FUERA_DE_TEMA = "no_definido"
 # Archivo con los dominios que bloquean la extracción (uno por línea, # = comentario).
 RUTA_DOMINIOS_EXCLUIDOS = Path(__file__).resolve().parent / "dominios_excluidos.txt"
 
+# Base de URLs de noticias versionada en el repo (712 KB). Es la entrada del
+# generador del dataset. Se resuelve contra la raíz del proyecto para que funcione
+# desde cualquier cwd.
+RUTA_DB_POR_DEFECTO = Path(__file__).resolve().parents[2] / "data" / "corpus_noticias" / "iglesia.db"
+
 
 @lru_cache(maxsize=1)
 def dominios_excluidos(ruta: str | Path | None = None) -> frozenset[str]:

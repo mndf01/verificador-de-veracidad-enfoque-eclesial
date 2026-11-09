@@ -26,7 +26,12 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-data/
+# `data/*` en vez de `data/`: ignorar el directorio completo impide des-ignorar
+# subcarpetas concretas (git no baja a directorios ignorados).
+data/*
+# Excepción: la base de URLs de noticias SÍ se versiona (712 KB). Es la entrada del
+# generador de dataset y no es un artefacto regenerable desde el repo.
+!data/corpus_noticias/
 .idea/
 
 # macOS

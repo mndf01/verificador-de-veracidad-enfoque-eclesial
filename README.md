@@ -577,6 +577,28 @@ python -m src.cli dataset-generar --db ruta/a/iglesia.db --n 500 --salida data/e
 python -m src.cli entrenar --dataset data/etiquetado.csv --salida data/modelo_rf.joblib
 ```
 
+#### Caché de textos (`data/cache_textos.jsonl`) — solo entrenamiento
+
+Si cambia el **tesauro** o la **fórmula del IVR**, hay que recalcular el dataset. El
+caché del IVR guarda señales, no el texto, así que sin este caché habría que
+**volver a descargar** las 2000 noticias (~2,5 h).
+
+```bash
+# La primera vez descarga y guarda el texto de cada noticia
+verificador dataset-generar --db ruta/a/iglesia.db --n 320
+
+# Tras cambiar el tesauro: recalcula sin descargar (usa el texto cacheado)
+verificador dataset-generar --db ruta/a/iglesia.db --n 320 --recalcular
+```
+
+| Caché | Guarda | Se invalida al… |
+|---|---|---|
+| `cache_textos.jsonl` | Texto extraído | nunca |
+| `cache_ivr.jsonl` | Señales del IVR | cambiar tesauro (`--recalcular`) |
+
+> **Solo lo usa `dataset-generar`.** El flujo de usuario (`evaluar`, `chat`) descarga
+> la noticia en el momento y no lee ni escribe este caché.
+
 #### Caché de IVR (`data/cache_ivr.jsonl`)
 
 Descargar y calcular el IVR de una noticia cuesta **~5 s** (dominado por la petición

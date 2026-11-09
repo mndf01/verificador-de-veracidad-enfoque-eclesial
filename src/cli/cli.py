@@ -74,6 +74,13 @@ def construir_parser() -> argparse.ArgumentParser:
     p_ds.add_argument("--cache", default=None,
                       help="Ruta del cache IVR (por defecto data/cache_ivr.jsonl). "
                            "Evita re-descargar noticias ya procesadas.")
+    p_ds.add_argument("--cache-textos", default=None,
+                      help="Ruta del cache de TEXTOS (data/cache_textos.jsonl). "
+                           "Reutiliza el texto entre recalculos: cambiar el tesauro no "
+                           "obliga a re-descargar.")
+    p_ds.add_argument("--recalcular", action="store_true",
+                      help="Ignora el resultado del cache IVR y vuelve a procesar usando el "
+                           "texto del cache de textos. Necesario tras cambiar el tesauro.")
     p_ds.set_defaults(func=_cmd_dataset)
 
     # ---- entrenar ----
@@ -278,6 +285,7 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
         calcular_umbral_proximo,
     )
     from src.dataset.cache import CacheIVR
+    from src.dataset.cache_textos import CacheTextos
     from src.dataset.generador import CATEGORIA_FUERA_DE_TEMA, dominios_excluidos, filtrar_excluidos
 
     try:
@@ -310,20 +318,28 @@ def _cmd_dataset(args: argparse.Namespace) -> int:
     procesadas = []
     fallidas = []
     cache = CacheIVR(args.cache)
-    print(f"caché IVR: {len(cache)} noticias ya procesadas ({cache.ruta})")
+    cache_txt = CacheTextos(args.cache_textos)
+    est = cache_txt.estadisticas()
+    print(f"caché IVR   : {len(cache)} noticias ya procesadas ({cache.ruta})")
+    print(f"caché textos: {est['con_texto']} noticias con texto guardado "
+          f"({est['fallidas']} fallidas) → {est['ruta']}")
     reutilizadas = 0
     for i, item in enumerate(seleccion, 1):
         print(f"[{i}/{len(seleccion)}] {item.categoria:<12} {item.url[:60]}", end="  ", flush=True)
 
-        # Caché primero: evita volver a descargar y recalcular el IVR.
-        res = cache.obtener(item.url)
+        # Caché del IVR: evita volver a descargar Y a recalcular.
+        # Con --recalcular se ignora el resultado del IVR y se vuelve a procesar
+        # (usando el texto del caché de textos): necesario cuando cambia el tesauro
+        # o la fórmula, porque el IVR cacheado quedaría obsoleto.
+        res = None if args.recalcular else cache.obtener(item.url)
         if res is not None:
             reutilizadas += 1
             etiqueta = "(caché)"
         else:
-            res = procesar_noticia(item, tam_ventana=args.ventana, solape=args.solape)
+            res = procesar_noticia(item, tam_ventana=args.ventana, solape=args.solape,
+                                   cache_textos=cache_txt)
             cache.guardar(res)      # se guarda también si falló: no reintentar bloqueos
-            etiqueta = ""
+            etiqueta = "(recalculado)" if args.recalcular else ""
 
         if not res.ok:
             fallidas.append((item.url, res.motivo))

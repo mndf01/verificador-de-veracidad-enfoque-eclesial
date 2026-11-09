@@ -23,7 +23,10 @@ import sqlite3
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable
+
+if TYPE_CHECKING:                       # solo para anotaciones, evita import circular
+    from .cache_textos import CacheTextos
 
 # Parámetros por defecto de la ventana deslizante (palabras).
 VENTANA_PALABRAS = 175
@@ -205,6 +208,7 @@ def procesar_noticia(
     tam_ventana: int = VENTANA_PALABRAS,
     solape: int = SOLAPE_PALABRAS,
     umbral_senal: float = 0.15,
+    cache_textos: "CacheTextos | None" = None,
 ) -> NoticiaProcesada:
     """Descarga la noticia, la trocea en ventanas y corre el IVR en cada una.
 
@@ -220,7 +224,12 @@ def procesar_noticia(
     if calcular_ivr is None:
         from src.vectorizacion.ivr import calcular_ivr as calcular_ivr
 
-    texto = extraer_contenido(item.url)
+    # El caché de textos evita re-descargar cuando solo cambió el tesauro o la
+    # fórmula del IVR. Si no se pasa uno, se descarga directamente.
+    if cache_textos is not None:
+        texto = cache_textos.obtener_o_descargar(item.url, extraer_contenido)
+    else:
+        texto = extraer_contenido(item.url)
     if not texto:
         res.motivo = "no se pudo extraer contenido"
         return res

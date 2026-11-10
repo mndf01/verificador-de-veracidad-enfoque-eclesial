@@ -101,7 +101,7 @@ verificador-de-veracidad-enfoque-eclesial/
 │   │
 │   ├── procesamiento_nlp/
 │   │   ├── tesauro_tools.py # Valida el tesauro y busca candidatos en el corpus (solo lectura)
-│   │   └── tesauro.json     # Tesauro ontológico (61 conceptos, 6 categorías canónicas)
+│   │   └── tesauro.json     # Tesauro ontológico (112 conceptos, 840 formas, 6 categorías canónicas)
 │   │
 │   ├── vectorizacion/
 │   │   └── ivr.py            # IVR: stemming Snowball, señales SB/L/SO/J + vector_caracteristicas()
@@ -112,7 +112,10 @@ verificador-de-veracidad-enfoque-eclesial/
 │   │   └── agregacion.py    # Agrega features de ventanas y asigna veredicto (proxy/umbral/débil)
 │   │
 │   ├── modelo/
-│   │   └── rf.py             # Random Forest: entrena / predice el veredicto (capa de decisión)
+│   │   ├── rf.py             # Random Forest: entrena / predice el veredicto (capa de decisión)
+│   │   ├── baseline.py       # Evaluación comparativa Baseline RAG vs. Modelo Híbrido + Test McNemar + Gráficos SVG/HTML
+│   │   ├── calibracion.py    # Ablación de circularidad (12 features) y calibración de pesos del IVR (AUC-ROC)
+│   │   └── analisis_sesgo.py # Auditoría de neutralidad editorial en 96 medios (afín, crítica, neutral, secular)
 │   │
 │   └── web_extractor/       # Extracción de contenido de noticias (trafilatura)
 │       ├── __init__.py       # API pública (extraer_contenido_url, extraer_titular, ...)
@@ -365,7 +368,7 @@ $$\text{IVR} = \frac{w_{SB}\cdot SB + w_L\cdot L + w_{SO}\cdot SO + w_J\cdot J}{
 
 - **$SB$ (Similitud Semántica, `peso_sb = 0.40`):** similitud coseno devuelta por el modelo SBERT.
 - **$L$ (Coincidencia Literal con Stemming, `peso_literal = 0.25`):** aplica `snowballstemmer` (`spanish`) sobre las palabras de contenido (sin palabras vacías) para capturar flexiones morfológicas de género, número y conjugación (`necesario`/`necesaria`, `obispo`/`obispos`). En premisas cortas (`< 12` tokens de contenido) promedia `0.5 · contención_unigramas + 0.5 · contención_bigramas` (Opción 1C), evitando que incisos explicativos dentro de una norma anulen la coincidencia; en textos largos (`>= 12` tokens, como las ventanas móviles de 175 palabras) utiliza bigramas puros.
-- **$SO$ (Coincidencia Ontológica Simétrica, `peso_ontologico = 0.20`):** indexa los **61 conceptos** (312 formas léxicas) de `tesauro.json` mediante sus raíces morfológicas (*stems* Snowball, verificado con **0 colisiones de stem** entre conceptos). Cuando la premisa activa al menos un concepto, combina:
+- **$SO$ (Coincidencia Ontológica Simétrica, `peso_ontologico = 0.20`):** indexa los **112 conceptos** (840 formas léxicas tras expansión canónica y poda empírica de polisemia) de `tesauro.json` mediante sus raíces morfológicas (*stems* Snowball, verificado con **0 colisiones de stem** entre conceptos). Cuando la premisa activa al menos un concepto, combina:
   1. La fracción de conceptos de la premisa respaldados por la categoría de la norma o presentes en los conceptos de la norma (`frac_premisa`). Si la norma proviene de `expansion_dinamica` con categoría genérica, infiere sus categorías ontológicas a partir de los conceptos detectados en el propio fragmento del PDF.
   2. La especificidad conceptual de la norma (`|P ∩ N| / |N|`), evitando que normas extensas con múltiples conceptos ajenos o normas sin conceptos (`conceptos_norma == {}`) saturen a `1.0`.
   - Si la premisa no activa ningún concepto del tesauro (p. ej. una noticia secular ajena al ámbito eclesial), $SO$ es `None` y la fórmula renormaliza los pesos restantes (`so_disponible = 0.0`).
@@ -670,12 +673,18 @@ del IVR queda como capa interpretativa independiente.
 en la evaluación. La diferencia entre ambas exactitudes cuantifica cuánto del rendimiento
 es memorización del medio y cuánto generalización de contenido.
 
-Resultado con 494 noticias (87 dominios):
+Resultado sobre el dataset completo de **1.555 noticias (96 dominios)** con el tesauro expandido y podado de 112 conceptos:
 
-| Partición | Exactitud |
-|---|:---:|
-| Aleatoria | 0.774 |
-| **Agrupada por dominio** | **0.865** |
+| Partición | Exactitud | Brecha |
+|---|:---:|:---:|
+| Aleatoria (`n_test = 389`) | 0.774 | — |
+| **Agrupada por dominio (`n_test = 334`, 24 medios no vistos)** | **0.763** | **+0.010** |
+
+| Clase | Precisión | Recall | $F_1$-Score | Soporte (Test Agrupado) |
+|---|:---:|:---:|:---:|:---:|
+| `proximo` | 0.765 | 0.839 | **0.800** | 31 |
+| `distante` | 0.779 | 0.797 | **0.788** | 177 |
+| `no_definido` | 0.739 | 0.698 | **0.718** | 126 |
 
 La partición agrupada da **mejor** exactitud: el modelo aprende del contenido, no del medio.
 
@@ -705,7 +714,7 @@ resultado = rf.predecir(modelo["clf"], modelo["le"], rf._X_de_informe(informe))
 
 ### 8. Tesauro: validar y buscar candidatos
 
-Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (61 conceptos en 6 categorías; nunca lo modifica automáticamente):
+Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (**112 conceptos y 840 formas léxicas** en 6 categorías canónicas tras expansión canónica y poda empírica de polisemia; nunca lo modifica automáticamente):
 
 ```bash
 python -m src.procesamiento_nlp.tesauro_tools validar
@@ -716,6 +725,38 @@ python -m src.procesamiento_nlp.tesauro_tools candidatos --top 40 --salida candi
 - **`candidatos`** lista frases frecuentes del corpus que todavía no están en el tesauro. Habrá ruido: se revisa a mano. El CSV se abre en Excel con las tildes bien.
 - **Peso de autoridad:** es **solo el del documento** (lo asigna `clasificador_metadatos_v1.py`). Los conceptos del tesauro no necesitan `nivel_autoridad`; si existe se acepta, pero no se usa.
 - Necesita el corpus crudo (`src/corp_extractor/extractores/data/corpus_*_v1.json`) en la máquina; sin él, `validar` solo revisa el formato.
+
+### 9. Evaluación Comparativa (Baseline RAG vs. Modelo Híbrido), Calibración, Sesgo y Gráficos de Defensa
+
+Para demostrar empíricamente la **Hipótesis de Investigación ($H_1$)** frente al sistema de control (**Baseline Vanilla-RAG** basado en umbrales de similitud coseno `sb_max` según Bayani et al., 2025 y Pu et al., 2024) y generar los gráficos vectoriales de alta resolución y el panel interactivo para el tribunal examinador:
+
+```bash
+# 1. Ejecutar comparativa completa (Baseline Fijo vs Calibrado vs Modelo Híbrido + Test de McNemar)
+#    y generar automáticamente los 5 gráficos SVG + panel HTML en docs/graficos_tesis/
+python -m src.modelo.baseline --graficos
+
+# 2. Ejecutar ablación de circularidad (12 señales puras) y calibración de pesos por AUC-ROC
+python -m src.modelo.calibracion
+
+# 3. Ejecutar auditoría de neutralidad editorial en los 96 medios (afín, crítica, neutral, secular)
+python -m src.modelo.analisis_sesgo --dataset data/etiquetado.csv
+```
+
+#### Resumen de la Contrastación de Hipótesis ($H_1$ vs. $H_0$, Test Agrupado $n=334$, 24 medios no vistos)
+
+| Modelo Evaluado | Exactitud | Macro-Precision | Macro-Recall | Macro-$F_1$ | $F_1$ `proximo` | Falsos Positivos (`proximo`) | Test de McNemar vs. Híbrido |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Baseline RAG (Fijo `0.70 / 0.45`)** | 56.59 % | 0.5991 | 0.6104 | 0.5138 | 0.379 | 76 | $\chi^2 = 35.21 \ (p = 2.96 \times 10^{-9})$ |
+| **Baseline RAG (Calibrado `0.762 / 0.512`)** | 66.77 % | 0.6014 | 0.5937 | 0.5847 | 0.389 | 27 | $\chi^2 = 11.44 \ (p = 7.19 \times 10^{-4})$ |
+| **Modelo Híbrido Propuesto (IVR + RF)** | **76.35 %** | **0.7611** | **0.7779** | **0.7687** | **0.800** | **8 (-89.5 %)** | — *(Referencia ganadora)* |
+
+#### Gráficos generados en `docs/graficos_tesis/`
+- `1_comparativa_baseline_vs_hibrido.svg`: Barras agrupadas de Exactitud, Macro-$F_1$ y $F_1$ por clase.
+- `2_matrices_confusion_test_agrupado.svg`: Matrices de confusión lado a lado mostrando la reducción del **89,5 %** en falsos positivos de `proximo` (de 76 a 8).
+- `3_impacto_tesauro_61_vs_112.svg`: Salto de rendimiento del tesauro de 61 a 112 conceptos (`70,3 % -> 76,3 %`).
+- `4_importancia_variables_y_auc.svg`: Importancia MDI de las 12 variables puras y comparación AUC-ROC de pesos (`0.9347`).
+- `5_neutralidad_editorial_medios.svg`: Ausencia de sesgo ideológico entre medios afines (`21,4 %`) y críticos (`17,8 %`).
+- `panel_defensa_jurado.html`: Panel interactivo autocontenido listo para abrir en cualquier navegador durante la defensa oral.
 
 ---
 
@@ -760,4 +801,5 @@ pytest tests/test_clasificador_metadatos.py -v
 | IVR mejorado (stemmer Snowball en $L$ y tesauro, $SO$ simétrica, 16 features + tests de auditoría) | ✅ |
 | Expansión dinámica (PDF externo en memoria, conectado al IVR y al CLI `--pdf`) | ✅ |
 | Orquestador CLI (`evaluar`, `setup`, `dataset-generar`, `entrenar`) | ✅ |
-| Random Forest + veredicto (`src/modelo/rf.py` + `src/dataset/`) | ⏳ código listo · falta correr `dataset-generar` + `entrenar` sobre `iglesia.db` |
+| Random Forest + veredicto (`src/modelo/rf.py`, 1.555 noticias, 76,35 % exactitud agrupada) | ✅ |
+| Comparativa Baseline RAG + Test de McNemar + Gráficos de Defensa (`src/modelo/baseline.py`) | ✅ |

@@ -822,7 +822,7 @@ pytest tests/test_clasificador_metadatos.py -v
 
 ---
 
-## Autores y Créditos
+## Autores
 
 Este software constituye el desarrollo tecnológico y producto de ingeniería del **Trabajo Final de Grado** en la carrera de **Ingeniería Informática** de la **Universidad Católica "Nuestra Señora de la Asunción" (Campus Itapúa)**:
 
@@ -830,6 +830,5 @@ Este software constituye el desarrollo tecnológico y producto de ingeniería de
 * **Gnatenko Tcachuk, Misael David**
 * **Benítez Rivero, Alejandro Andrés**
 
-* **Tutora metodológica y temática:** Lic. Myrna Susana Morales
 * **Año:** 2026
 * **Licencia de Software:** [MIT License](LICENSE) (Acceso abierto con requerimiento legal de atribución y reconocimiento de autoría en cualquier uso o derivación).

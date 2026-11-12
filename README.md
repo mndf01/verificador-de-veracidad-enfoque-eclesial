@@ -299,12 +299,23 @@ verificador chat
 verificador chat --pdf tests/ejemplos/decreto_diocesano_ejemplo.pdf
 ```
 
-| Entrada | Acción | Fiabilidad |
-|---|---|---|
-| `https://...` | Evalúa la noticia de esa URL (descarga y analiza el cuerpo) | ✅ Alta |
-| `texto libre` | Lo evalúa como afirmación a contrastar (no descarga nada) | ⚠️ **Baja** (ver abajo) |
-| `/pdf RUTA` | Carga un PDF en la sesión (expansión dinámica) |
-| `/pdf off` · `/historial` · `/modelo` · `/ayuda` · `/salir` | Comandos de sesión |
+#### Modos de Entrada para Evaluación
+
+| Tipo de Entrada | Sintaxis / Formato | Acción del Pipeline | Fiabilidad Predictiva |
+| :--- | :--- | :--- | :---: |
+| **URL Periodística** | `https://...` | Descarga el cuerpo HTML y lo evalúa por ventanas deslizantes de 175 palabras. | ✅ **Alta** (Modo oficial) |
+| **Texto Libre** | `afirmación doctrinal` | Evalúa la frase directa sin scraping web (sensible a longitud). | ⚠️ **Baja** (Premisa corta, ver abajo) |
+
+#### Comandos Especiales de Sesión
+
+| Comando | Acción | Descripción Operativa |
+| :--- | :--- | :--- |
+| `/pdf <ruta>` | Carga transitoria | Incorpora un documento PDF externo en la memoria de la sesión (expansión dinámica). |
+| `/pdf off` | Descarga de PDF | Desactiva el PDF cargado y restaura el corpus universal cerrado. |
+| `/modelo` | Inspección técnica | Muestra los hiperparámetros del Random Forest, variables activas y distribución de clases. |
+| `/historial` | Registro de sesión | Despliega las noticias evaluadas y sus veredictos en la sesión actual. |
+| `/ayuda` | Asistencia | Muestra el catálogo de comandos interactivos disponibles. |
+| `/salir` | Finalización | Concluye la sesión interactiva y regresa al terminal del sistema. |
 
 La salida usa paneles coloreados por clase (`proximo` verde, `distante` ámbar,
 `no_definido` azul), una tabla de evidencias con barras de IVR y un spinner

@@ -2,6 +2,11 @@
 name = "verificador-veracidad"
 version = "0.1.0"
 description = "Verificador de veracidad con base cerrada de documentos de la Iglesia Católica: contrasta noticias/artículos frente a textos normativos canónicos usando RAG (ChromaDB) + heurísticas semánticas IVR + Random Forest."
+authors = [
+    { name = "Delvalle Franco, Matias Natanael" },
+    { name = "Gnatenko Tcachuk, Misael David" },
+    { name = "Benítez Rivero, Alejandro Andrés" },
+]
 requires-python = ">=3.12"
 dependencies = [
     # Configuración centralizada (config.toml leído con pydantic)

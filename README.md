@@ -813,9 +813,23 @@ pytest tests/test_clasificador_metadatos.py -v
 | Capa ChromaDB (`corpus_canonico`, 2.965 documentos indexados y verificados) | ✅ |
 | Consulta semántica (RAG) con saneo defensivo de distancias | ✅ |
 | Extracción de noticias (`web_extractor` con `trafilatura`) | ✅ módulo terminado + pruebas, sin red |
-| Tesauro ontológico (61 conceptos, 0 colisiones de stem) + `tesauro_tools` | ✅ |
+| Tesauro ontológico (112 conceptos, 840 formas, 0 colisiones de stem) + `tesauro_tools` | ✅ |
 | IVR mejorado (stemmer Snowball en $L$ y tesauro, $SO$ simétrica, 16 features + tests de auditoría) | ✅ |
 | Expansión dinámica (PDF externo en memoria, conectado al IVR y al CLI `--pdf`) | ✅ |
 | Orquestador CLI (`evaluar`, `setup`, `dataset-generar`, `entrenar`) | ✅ |
 | Random Forest + veredicto (`src/modelo/rf.py`, 1.555 noticias, 76,35 % exactitud agrupada) | ✅ |
 | Comparativa Baseline RAG + Test de McNemar + Gráficos de Defensa (`src/modelo/baseline.py`) | ✅ |
+
+---
+
+## Autores y Créditos
+
+Este software constituye el desarrollo tecnológico y producto de ingeniería del **Trabajo Final de Grado** en la carrera de **Ingeniería Informática** de la **Universidad Católica "Nuestra Señora de la Asunción" (Campus Itapúa)**:
+
+* **Delvalle Franco, Matias Natanael**
+* **Gnatenko Tcachuk, Misael David**
+* **Benítez Rivero, Alejandro Andrés**
+
+* **Tutora metodológica y temática:** Lic. Myrna Susana Morales
+* **Año:** 2026
+* **Licencia de Software:** [MIT License](LICENSE) (Acceso abierto con requerimiento legal de atribución y reconocimiento de autoría en cualquier uso o derivación).

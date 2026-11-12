@@ -9,12 +9,12 @@ Arquitectura (igual que el resto del proyecto):
 
     informe = ivr.calcular_ivr(premisa)
     X_txt   = ivr.vector_caracteristicas(informe)   # dict nombre -> float
-    X_row   = [X_txt[c] for c in NOMBRES_CARACTERISTICAS]  # orden estable
-    y = rf.predecir(X_row)                           # -> "consistente" | "inconsistente" | "no_verificable"
+    X_row   = [X_txt[c] for c in CARACTERISTICAS_SIN_IVR]  # 12 señales puras (ablación D19)
+    y       = rf.predecir(modelo["clf"], modelo["le"], X_row)  # -> {"clase": "proximo" | "distante" | "no_definido", ...}
 
-El modelo se entrena con un CSV etiquetado a mano (calibración del TFG) que
-relaciona una premisa con su veredicto esperado. Cada fila = una premisa real
-etiquetada; las columnas son las características del IVR.
+El modelo se entrena sobre data/etiquetado.csv (1.555 noticias reales de 96
+medios etiquetadas mediante supervisión débil con ventana deslizante de 175 palabras).
+Se evalúa mediante doble partición: aleatoria y agrupada por dominio (GroupShuffleSplit).
 
 Uso:
     # Entrenar y guardar el modelo en disco (una vez, tras tener el dataset)

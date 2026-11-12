@@ -121,7 +121,7 @@ verificador-de-veracidad-enfoque-eclesial/
 │       ├── __init__.py       # API pública (extraer_contenido_url, extraer_titular, ...)
 │       └── web_extractor.py  # URL/HTML → texto + metadatos, sin red en las pruebas
 │
-├── tests/                   # 180 pruebas unitarias y de regresión (pytest)
+├── tests/                   # 208 pruebas unitarias y de regresión (pytest)
 │   ├── test_ivr.py                    # pruebas del IVR y regresión de auditoría (stemmer, SO, NaN)
 │   ├── test_orquestador.py            # pruebas del orquestador (con dobles, sin red/Chroma)
 │   ├── test_expansion_dinamica.py     # 96 pruebas del módulo de expansión dinámica
@@ -555,7 +555,7 @@ titulo = extraer_titular("https://...")
 
 ### 7. Random Forest (capa de decisión) y generación de dataset
 
-El módulo `src/modelo/rf.py` clasifica el **veredicto final** (`consistente`, `inconsistente`, `no_verificable`) consumiendo el vector de características que produce el IVR (`ivr.vector_caracteristicas()`) — un vector plano de **16 floats**:
+El módulo `src/modelo/rf.py` clasifica el **veredicto final** (`proximo`, `distante`, `no_definido`) consumiendo el vector de características que produce el IVR (`ivr.vector_caracteristicas()`) — un vector descriptivo de **16 floats** del cual el clasificador extrae **12 señales puras** (`CARACTERISTICAS_SIN_IVR`, ablación D19) para evitar circularidad:
 
 ```python
 NOMBRES_CARACTERISTICAS = [
@@ -622,7 +622,7 @@ repetirlo al re-etiquetar o cambiar umbrales.
 
 #### Exclusión de dominios bloqueados
 
-`src/dataset/dominios_excluidos.txt` lista **19 dominios** que bloquean la extracción
+`src/dataset/dominios_excluidos.txt` lista **22 dominios** que bloquean la extracción
 automática (anti-scraping, paywall, JS obligatorio), detectados probando una URL de
 cada uno.
 
@@ -703,7 +703,7 @@ from src.modelo import rf      # módulo dentro de src/modelo/rf.py
 informe = ivr.calcular_ivr(premisa)
 modelo  = rf.cargar("data/modelo_rf.joblib")
 resultado = rf.predecir(modelo["clf"], modelo["le"], rf._X_de_informe(informe))
-# resultado = {"clase": "inconsistente", "probabilidad": 0.87, "probabilidades": {...}}
+# resultado = {"clase": "distante", "probabilidad": 0.87, "probabilidades": {...}}
 ```
 
 **Dos roles del RF en la tesis** (ver `config.IvrConfig` y el docstring de `ivr.py`):
@@ -762,10 +762,10 @@ python -m src.modelo.analisis_sesgo --dataset data/etiquetado.csv
 
 ## Suite de pruebas automatizadas (`pytest`)
 
-El proyecto cuenta con **180 pruebas automatizadas** (y 41 subtests) que se ejecutan en ~5 segundos sin red ni necesidad de alterar la colección persistente de ChromaDB:
+El proyecto cuenta con **208 pruebas automatizadas** (y 41 subtests) que se ejecutan en ~5 segundos sin red ni necesidad de alterar la colección persistente de ChromaDB:
 
 ```bash
-# Ejecutar toda la suite (180 passed)
+# Ejecutar toda la suite (206 passed, 2 skipped)
 pytest -v
 
 # Ejecutar únicamente los tests de regresión de la auditoría del IVR

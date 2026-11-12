@@ -34,26 +34,31 @@ PDF externo opcional (--pdf) ──► SesionExpansion (EphemeralClient) ──�
 
 ---
 
-## Instalación (desde cero)
+## Instalación
 
 ```bash
-git clone <url-del-repo>
+# 1. Clonar el repositorio
+git clone https://github.com/mndf01/verificador-de-veracidad-enfoque-eclesial.git
 cd verificador-de-veracidad-enfoque-eclesial
 
-# 1. Entorno virtual
+# 2. Crear y activar el entorno virtual
 python -m venv .venv
-source .venv/bin/activate        # Windows (PowerShell): .\venv\Scripts\Activate.ps1
+source .venv/bin/activate        # Windows (PowerShell): .\.venv\Scripts\Activate.ps1
 
-# 2. Dependencias (ver aviso de torch arriba)
-#    -e = modo editable: vincula `config` y `src` a la raíz del repo.
-#    (Con `pip install .` a secas se copia config.py a site-packages y
-#    queda una copia vieja que puede importarse por error desde otras rutas.)
+# 3. Instalar PyTorch (CPU) y dependencias del proyecto en modo editable
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[dev]"
 
-# 3. Smoke test: abre la colección ChromaDB y muestra cuántos docs tiene
-python main.py
-# Salida esperada si ya se indexó: un número (2965 con el corpus completo)
-# Salida si está vacía: 0 (ejecutar `python -m src.cli setup`)
+# 4. Descargar y descomprimir los artefactos preindexados (Release oficial v1.0.0)
+curl -L -O https://github.com/mndf01/verificador-de-veracidad-enfoque-eclesial/releases/download/v1.0.0/artefactos-verificador.zip
+tar -xf artefactos-verificador.zip
+# Nota: Esto restaura en data/ la base vectorial ChromaDB (2.965 fragmentos canónicos),
+# el clasificador Random Forest entrenado y el dataset de 1.555 noticias reales.
+# Alternativamente, para reconstruir el corpus desde cero mediante scraping web: verificador setup
+
+# 5. Smoke test y verificación de la suite de pruebas
+python main.py                   # Debe mostrar: 2965 documentos indexados
+pytest -v                        # Ejecuta las 208 pruebas automatizadas
 ```
 
 ---

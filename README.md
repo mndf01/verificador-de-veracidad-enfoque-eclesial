@@ -106,7 +106,7 @@ verificador-de-veracidad-enfoque-eclesial/
 │   │
 │   ├── procesamiento_nlp/
 │   │   ├── tesauro_tools.py # Valida el tesauro y busca candidatos en el corpus (solo lectura)
-│   │   └── tesauro.json     # Tesauro ontológico (112 conceptos, 840 formas, 6 categorías canónicas)
+│   │   └── tesauro.json     # Tesauro ontológico (112 conceptos, 843 formas, 6 categorías canónicas)
 │   │
 │   ├── vectorizacion/
 │   │   └── ivr.py            # IVR: stemming Snowball, señales SB/L/SO/J + vector_caracteristicas()
@@ -384,7 +384,7 @@ $$\text{IVR} = \frac{w_{SB}\cdot SB + w_L\cdot L + w_{SO}\cdot SO + w_J\cdot J}{
 
 - **$SB$ (Similitud Semántica, `peso_sb = 0.40`):** similitud coseno devuelta por el modelo SBERT.
 - **$L$ (Coincidencia Literal con Stemming, `peso_literal = 0.25`):** aplica `snowballstemmer` (`spanish`) sobre las palabras de contenido (sin palabras vacías) para capturar flexiones morfológicas de género, número y conjugación (`necesario`/`necesaria`, `obispo`/`obispos`). En premisas cortas (`< 12` tokens de contenido) promedia `0.5 · contención_unigramas + 0.5 · contención_bigramas` (Opción 1C), evitando que incisos explicativos dentro de una norma anulen la coincidencia; en textos largos (`>= 12` tokens, como las ventanas móviles de 175 palabras) utiliza bigramas puros.
-- **$SO$ (Coincidencia Ontológica Simétrica, `peso_ontologico = 0.20`):** indexa los **112 conceptos** (840 formas léxicas tras expansión canónica y poda empírica de polisemia) de `tesauro.json` mediante sus raíces morfológicas (*stems* Snowball, verificado con **0 colisiones de stem** entre conceptos). Cuando la premisa activa al menos un concepto, combina:
+- **$SO$ (Coincidencia Ontológica Simétrica, `peso_ontologico = 0.20`):** indexa los **112 conceptos** (843 formas léxicas tras expansión canónica y poda empírica de polisemia) de `tesauro.json` mediante sus raíces morfológicas (*stems* Snowball, verificado con **0 colisiones de stem** entre conceptos). Cuando la premisa activa al menos un concepto, combina:
   1. La fracción de conceptos de la premisa respaldados por la categoría de la norma o presentes en los conceptos de la norma (`frac_premisa`). Si la norma proviene de `expansion_dinamica` con categoría genérica, infiere sus categorías ontológicas a partir de los conceptos detectados en el propio fragmento del PDF.
   2. La especificidad conceptual de la norma (`|P ∩ N| / |N|`), evitando que normas extensas con múltiples conceptos ajenos o normas sin conceptos (`conceptos_norma == {}`) saturen a `1.0`.
   - Si la premisa no activa ningún concepto del tesauro (p. ej. una noticia secular ajena al ámbito eclesial), $SO$ es `None` y la fórmula renormaliza los pesos restantes (`so_disponible = 0.0`).
@@ -730,7 +730,7 @@ resultado = rf.predecir(modelo["clf"], modelo["le"], rf._X_de_informe(informe))
 
 ### 8. Tesauro: validar y buscar candidatos
 
-Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (**112 conceptos y 840 formas léxicas** en 6 categorías canónicas tras expansión canónica y poda empírica de polisemia; nunca lo modifica automáticamente):
+Herramienta de **solo lectura** para mantener `src/procesamiento_nlp/tesauro.json` (**112 conceptos y 843 formas léxicas** en 6 categorías canónicas tras expansión canónica y poda empírica de polisemia; nunca lo modifica automáticamente):
 
 ```bash
 python -m src.procesamiento_nlp.tesauro_tools validar
@@ -813,7 +813,7 @@ pytest tests/test_clasificador_metadatos.py -v
 | Capa ChromaDB (`corpus_canonico`, 2.965 documentos indexados y verificados) | ✅ |
 | Consulta semántica (RAG) con saneo defensivo de distancias | ✅ |
 | Extracción de noticias (`web_extractor` con `trafilatura`) | ✅ módulo terminado + pruebas, sin red |
-| Tesauro ontológico (112 conceptos, 840 formas, 0 colisiones de stem) + `tesauro_tools` | ✅ |
+| Tesauro ontológico (112 conceptos, 843 formas, 0 colisiones de stem) + `tesauro_tools` | ✅ |
 | IVR mejorado (stemmer Snowball en $L$ y tesauro, $SO$ simétrica, 16 features + tests de auditoría) | ✅ |
 | Expansión dinámica (PDF externo en memoria, conectado al IVR y al CLI `--pdf`) | ✅ |
 | Orquestador CLI (`evaluar`, `setup`, `dataset-generar`, `entrenar`) | ✅ |
